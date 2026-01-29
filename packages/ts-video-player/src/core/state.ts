@@ -1,0 +1,396 @@
+/**
+ * ts-video-player State Management
+ *
+ * Simple reactive state system for the video player.
+ *
+ * @module core/state
+ */
+
+import type { PlayerState, TimeRange } from '../types'
+
+// =============================================================================
+// Reactive Signal System
+// =============================================================================
+
+type Listener<T> = (value: T, prev: T) => void
+type Unsubscribe = () => void
+
+/**
+ * Create a reactive signal
+ */
+export function createSignal<T>(initial: T): [() => T, (value: T | ((prev: T) => T)) => void] {
+  let value = initial
+  const listeners = new Set<Listener<T>>()
+
+  const get = () => value
+
+  const set = (newValue: T | ((prev: T) => T)) => {
+    const prev = value
+    value = typeof newValue === 'function' ? (newValue as (prev: T) => T)(prev) : newValue
+    if (value !== prev) {
+      listeners.forEach((listener) => listener(value, prev))
+    }
+  }
+
+  // Attach subscribe method to getter
+  ;(get as any).subscribe = (listener: Listener<T>): Unsubscribe => {
+    listeners.add(listener)
+    return () => listeners.delete(listener)
+  }
+
+  return [get, set]
+}
+
+/**
+ * Create a computed value from signals
+ */
+export function computed<T>(fn: () => T, deps: Array<() => unknown>): () => T {
+  let value: T
+  let dirty = true
+
+  // Subscribe to all dependencies
+  deps.forEach((dep) => {
+    if ((dep as any).subscribe) {
+      (dep as any).subscribe(() => {
+        dirty = true
+      })
+    }
+  })
+
+  return () => {
+    if (dirty) {
+      value = fn()
+      dirty = false
+    }
+    return value
+  }
+}
+
+// =============================================================================
+// Player State Store
+// =============================================================================
+
+/**
+ * Default player state
+ */
+export function createDefaultState(): PlayerState {
+  return {
+    // Source
+    src: null,
+    sources: [],
+    currentSourceIndex: 0,
+    mediaType: 'unknown',
+    streamType: 'unknown',
+    providerType: 'unknown',
+
+    // Loading
+    loadingState: 'idle',
+    preload: 'metadata',
+    canPlay: false,
+    canPlayThrough: false,
+    error: null,
+
+    // Playback
+    playbackState: 'idle',
+    paused: true,
+    playing: false,
+    ended: false,
+    seeking: false,
+    waiting: false,
+    currentTime: 0,
+    duration: 0,
+    playbackRate: 1,
+    loop: false,
+    autoplay: false,
+    playsinline: true,
+
+    // Volume
+    muted: false,
+    volume: 1,
+
+    // Buffering
+    buffered: [],
+    bufferedAmount: 0,
+    seekable: [],
+
+    // Dimensions
+    videoWidth: 0,
+    videoHeight: 0,
+    aspectRatio: 16 / 9,
+
+    // Tracks
+    qualities: [],
+    autoQuality: true,
+    audioTracks: [],
+    textTracks: [],
+
+    // Fullscreen/PiP
+    fullscreen: false,
+    pictureInPicture: false,
+    canFullscreen: false,
+    canPictureInPicture: false,
+
+    // UI
+    controlsVisible: true,
+    userActive: true,
+    pointerOver: false,
+
+    // Metadata
+    title: '',
+    poster: '',
+  }
+}
+
+/**
+ * State store for the player
+ */
+export class StateStore {
+  private state: PlayerState
+  private listeners = new Map<keyof PlayerState | '*', Set<(state: PlayerState, key?: keyof PlayerState) => void>>()
+
+  constructor(initial?: Partial<PlayerState>) {
+    this.state = { ...createDefaultState(), ...initial }
+  }
+
+  /**
+   * Get the current state
+   */
+  getState(): Readonly<PlayerState> {
+    return this.state
+  }
+
+  /**
+   * Get a specific state value
+   */
+  get<K extends keyof PlayerState>(key: K): PlayerState[K] {
+    return this.state[key]
+  }
+
+  /**
+   * Set state values
+   */
+  set<K extends keyof PlayerState>(key: K, value: PlayerState[K]): void {
+    if (this.state[key] === value) return
+
+    this.state = { ...this.state, [key]: value }
+    this.notify(key)
+  }
+
+  /**
+   * Batch update multiple state values
+   */
+  batch(updates: Partial<PlayerState>): void {
+    let changed = false
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (this.state[key as keyof PlayerState] !== value) {
+        ;(this.state as any)[key] = value
+        changed = true
+        this.notifyKey(key as keyof PlayerState)
+      }
+    }
+
+    if (changed) {
+      this.notifyAll()
+    }
+  }
+
+  /**
+   * Subscribe to state changes
+   */
+  subscribe(
+    keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
+    listener?: (state: PlayerState, key?: keyof PlayerState) => void,
+  ): Unsubscribe {
+    if (typeof keyOrListener === 'function') {
+      // Subscribe to all changes
+      const key = '*'
+      if (!this.listeners.has(key)) {
+        this.listeners.set(key, new Set())
+      }
+      this.listeners.get(key)!.add(keyOrListener)
+      return () => this.listeners.get(key)?.delete(keyOrListener)
+    }
+
+    // Subscribe to specific key
+    const key = keyOrListener
+    if (!listener) return () => {}
+
+    if (!this.listeners.has(key)) {
+      this.listeners.set(key, new Set())
+    }
+    this.listeners.get(key)!.add(listener)
+    return () => this.listeners.get(key)?.delete(listener)
+  }
+
+  /**
+   * Reset state to defaults
+   */
+  reset(): void {
+    this.state = createDefaultState()
+    this.notifyAll()
+  }
+
+  private notify(key: keyof PlayerState): void {
+    this.notifyKey(key)
+    this.notifyAll()
+  }
+
+  private notifyKey(key: keyof PlayerState): void {
+    this.listeners.get(key)?.forEach((listener) => listener(this.state, key))
+  }
+
+  private notifyAll(): void {
+    this.listeners.get('*')?.forEach((listener) => listener(this.state))
+  }
+}
+
+// =============================================================================
+// State Selectors (Computed Values)
+// =============================================================================
+
+/**
+ * Calculate buffered percentage
+ */
+export function selectBufferedAmount(state: PlayerState): number {
+  if (state.duration === 0 || state.buffered.length === 0) return 0
+
+  let buffered = 0
+  for (const range of state.buffered) {
+    buffered += range.end - range.start
+  }
+  return Math.min(buffered / state.duration, 1)
+}
+
+/**
+ * Calculate progress percentage
+ */
+export function selectProgress(state: PlayerState): number {
+  if (state.duration === 0) return 0
+  return Math.min(state.currentTime / state.duration, 1)
+}
+
+/**
+ * Get remaining time
+ */
+export function selectRemainingTime(state: PlayerState): number {
+  return Math.max(state.duration - state.currentTime, 0)
+}
+
+/**
+ * Check if player is in idle state
+ */
+export function selectIsIdle(state: PlayerState): boolean {
+  return state.loadingState === 'idle' && state.playbackState === 'idle'
+}
+
+/**
+ * Check if player is loading
+ */
+export function selectIsLoading(state: PlayerState): boolean {
+  return state.loadingState === 'loading' || state.waiting
+}
+
+/**
+ * Check if live stream
+ */
+export function selectIsLive(state: PlayerState): boolean {
+  return state.streamType.includes('live')
+}
+
+/**
+ * Check if DVR enabled
+ */
+export function selectIsDVR(state: PlayerState): boolean {
+  return state.streamType === 'live:dvr'
+}
+
+/**
+ * Get current quality
+ */
+export function selectCurrentQuality(state: PlayerState): string | null {
+  const selected = state.qualities.find((q) => q.selected)
+  if (!selected) return state.autoQuality ? 'auto' : null
+  return `${selected.height}p`
+}
+
+/**
+ * Get current text track
+ */
+export function selectCurrentTextTrack(state: PlayerState): string | null {
+  const showing = state.textTracks.find((t) => t.mode === 'showing')
+  return showing?.label || null
+}
+
+/**
+ * Get current audio track
+ */
+export function selectCurrentAudioTrack(state: PlayerState): string | null {
+  const selected = state.audioTracks.find((t) => t.selected)
+  return selected?.label || null
+}
+
+// =============================================================================
+// Storage Integration
+// =============================================================================
+
+const STORAGE_KEY = 'ts-video-player'
+
+interface StoredState {
+  volume: number
+  muted: boolean
+  playbackRate: number
+  captions: boolean
+}
+
+/**
+ * Load persisted state from storage
+ */
+export function loadPersistedState(storage: Storage = localStorage): Partial<StoredState> {
+  try {
+    const data = storage.getItem(STORAGE_KEY)
+    if (data) {
+      return JSON.parse(data)
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return {}
+}
+
+/**
+ * Save state to storage
+ */
+export function savePersistedState(state: Partial<StoredState>, storage: Storage = localStorage): void {
+  try {
+    const existing = loadPersistedState(storage)
+    storage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, ...state }))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
+ * Create storage sync for state store
+ */
+export function createStorageSync(
+  store: StateStore,
+  keys: (keyof StoredState)[] = ['volume', 'muted', 'playbackRate'],
+  storage: Storage = localStorage,
+): Unsubscribe {
+  // Load initial values
+  const persisted = loadPersistedState(storage)
+  if (persisted.volume !== undefined) store.set('volume', persisted.volume)
+  if (persisted.muted !== undefined) store.set('muted', persisted.muted)
+  if (persisted.playbackRate !== undefined) store.set('playbackRate', persisted.playbackRate)
+
+  // Subscribe to changes
+  const unsubscribes = keys.map((key) =>
+    store.subscribe(key as keyof PlayerState, (state) => {
+      const value = state[key as keyof PlayerState]
+      savePersistedState({ [key]: value } as Partial<StoredState>, storage)
+    }),
+  )
+
+  return () => unsubscribes.forEach((unsub) => unsub())
+}

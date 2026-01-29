@@ -1,0 +1,52 @@
+{
+  "name": "ts-video-player",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "A modern, framework-agnostic video player with deep stx integration",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-video-player#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-video-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stacksjs/ts-video-player/issues"
+  },
+  "keywords": [
+    "video",
+    "player",
+    "media",
+    "hls",
+    "dash",
+    "youtube",
+    "vimeo",
+    "stx",
+    "web-components",
+    "accessibility",
+    "streaming",
+    "captions",
+    "subtitles",
+    "ads",
+    "vast",
+    "analytics"
+  ],
+  "scripts": {
+    "build": "bun run --filter '*' build",
+    "dev": "bun run --filter ts-video-player dev",
+    "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
+    "test": "bun test",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "changelog": "bunx logsmith --verbose",
+    "changelog:generate": "bunx logsmith --output CHANGELOG.md",
+    "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
+    "dev:docs": "bunx bunpress dev",
+    "build:docs": "bunx bunpress build",
+    "preview:docs": "bunx bunpress preview",
+    "typecheck": "bun --bun tsc --noEmit"
+  },
+  "devDependencies": {
+    "better-dx": "^0.2.3"
+  }
+}
