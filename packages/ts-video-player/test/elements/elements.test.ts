@@ -18,6 +18,10 @@ describe('elements module', () => {
 
     const mod = await import('../../src/elements')
     expect(mod.VideoPlayerElement).toBeDefined()
+    expect(mod.VideoSkin).toBeDefined()
+    expect(mod.MediaTimeGroup).toBeDefined()
+    expect(mod.MediaTimeSeparator).toBeDefined()
+    expect(mod.MediaPreviewTime).toBeDefined()
     expect(mod.registerElements).toBeDefined()
   })
 })

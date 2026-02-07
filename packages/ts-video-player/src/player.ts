@@ -241,6 +241,7 @@ export class Player implements IPlayer {
     // Playback state
     el.dataset.paused = String(state.paused)
     el.dataset.playing = String(state.playing)
+    el.dataset.started = String(state.started)
     el.dataset.ended = String(state.ended)
     el.dataset.seeking = String(state.seeking)
     el.dataset.waiting = String(state.waiting)
@@ -422,7 +423,7 @@ export class Player implements IPlayer {
     })
 
     provider.on('playing', () => {
-      this._store.batch({ playing: true, waiting: false, playbackState: 'playing' })
+      this._store.batch({ playing: true, started: true, waiting: false, playbackState: 'playing' })
       this._events.emit('playing')
     })
 
@@ -578,6 +579,10 @@ export class Player implements IPlayer {
 
   async enterFullscreen(): Promise<void> {
     if (this.state.fullscreenAvailability === 'unsupported') return
+    // Exit PiP before entering fullscreen (mutual exclusion)
+    if (this.state.pictureInPicture) {
+      await this.exitPiP()
+    }
     await this._provider?.enterFullscreen()
     if (this._options.fullscreenOrientationLock !== false) {
       lockOrientation('landscape')
@@ -603,6 +608,10 @@ export class Player implements IPlayer {
 
   async enterPiP(): Promise<void> {
     if (this.state.pipAvailability === 'unsupported') return
+    // Exit fullscreen before entering PiP (mutual exclusion)
+    if (this.state.fullscreen) {
+      await this.exitFullscreen()
+    }
     await this._provider?.enterPiP()
   }
 

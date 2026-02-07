@@ -47,6 +47,7 @@ export {
   StateStore,
   createSignal,
   computed,
+  shallowEqual,
   createDefaultState,
   loadPersistedState,
   savePersistedState,
@@ -561,11 +562,15 @@ export {
 
 export {
   VideoPlayerElement,
+  VideoSkin,
   MediaPlayButton,
   MediaMuteButton,
   MediaFullscreenButton,
   MediaPipButton,
   MediaTimeDisplay,
+  MediaTimeGroup,
+  MediaTimeSeparator,
+  MediaPreviewTime,
   MediaProgressBar,
   MediaVolumeSlider,
   MediaSettingsMenu,

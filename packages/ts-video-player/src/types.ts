@@ -223,6 +223,8 @@ export interface PlayerState {
   paused: boolean
   /** Whether media is playing */
   playing: boolean
+  /** Whether playback has started at least once */
+  started: boolean
   /** Whether media has ended */
   ended: boolean
   /** Whether media is seeking */

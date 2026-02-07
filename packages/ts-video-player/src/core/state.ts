@@ -9,6 +9,32 @@
 import type { PlayerState, TimeRange } from '../types'
 
 // =============================================================================
+// Utilities
+// =============================================================================
+
+/**
+ * Shallow equality comparison for plain objects.
+ * Returns true if both objects have the same keys with === equal values.
+ * Used to optimize selector subscriptions — skip notifications when
+ * derived state hasn't meaningfully changed.
+ */
+export function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+
+  if (keysA.length !== keysB.length) return false
+
+  for (const key of keysA) {
+    if (a[key] !== b[key]) return false
+  }
+
+  return true
+}
+
+// =============================================================================
 // Reactive Signal System
 // =============================================================================
 
@@ -94,6 +120,7 @@ export function createDefaultState(): PlayerState {
     playbackState: 'idle',
     paused: true,
     playing: false,
+    started: false,
     ended: false,
     seeking: false,
     waiting: false,

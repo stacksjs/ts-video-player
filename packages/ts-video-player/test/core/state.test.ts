@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   createSignal,
   computed,
+  shallowEqual,
   StateStore,
   createDefaultState,
   selectBufferedAmount,
@@ -377,5 +378,49 @@ describe('deprecated selectors', () => {
     const state = { ...createDefaultState(), volumeAvailability: 'available' as const }
     expect(selectCanSetVolume(state)).toBe(true)
     expect(selectCanSetVolume(createDefaultState())).toBe(false)
+  })
+})
+
+// =============================================================================
+// shallowEqual
+// =============================================================================
+
+describe('shallowEqual', () => {
+  test('returns true for identical references', () => {
+    const obj = { a: 1, b: 2 }
+    expect(shallowEqual(obj, obj)).toBe(true)
+  })
+
+  test('returns true for equal objects', () => {
+    expect(shallowEqual({ a: 1, b: 'x' }, { a: 1, b: 'x' })).toBe(true)
+  })
+
+  test('returns false for different values', () => {
+    expect(shallowEqual({ a: 1 }, { a: 2 })).toBe(false)
+  })
+
+  test('returns false for different key counts', () => {
+    expect(shallowEqual({ a: 1 }, { a: 1, b: 2 } as any)).toBe(false)
+  })
+
+  test('returns false for missing keys', () => {
+    expect(shallowEqual({ a: 1, b: 2 }, { a: 1, c: 2 } as any)).toBe(false)
+  })
+
+  test('uses strict equality (not deep)', () => {
+    const arr = [1, 2, 3]
+    expect(shallowEqual({ a: arr }, { a: arr })).toBe(true)
+    expect(shallowEqual({ a: [1] }, { a: [1] } as any)).toBe(false) // different references
+  })
+})
+
+// =============================================================================
+// started state
+// =============================================================================
+
+describe('started state', () => {
+  test('default state has started: false', () => {
+    const state = createDefaultState()
+    expect(state.started).toBe(false)
   })
 })
