@@ -62,7 +62,8 @@ export class MediaSettingsMenu extends HTMLElement {
     }
 
     const trigger = this.shadowRoot!.querySelector('.trigger')!
-    trigger.addEventListener('click', () => this.toggle())
+    this._onTriggerClick = () => this.toggle()
+    trigger.addEventListener('click', this._onTriggerClick)
 
     // Close on outside click
     this._onDocClick = (e: MouseEvent) => {
@@ -79,12 +80,16 @@ export class MediaSettingsMenu extends HTMLElement {
     queueMicrotask(() => this.attach())
   }
 
+  private _onTriggerClick: (() => void) | null = null
   private _onDocClick: ((e: MouseEvent) => void) | null = null
   private _onDocKeydown: ((e: KeyboardEvent) => void) | null = null
 
   disconnectedCallback(): void {
     this._cleanup?.()
     this._cleanup = null
+    if (this._onTriggerClick) {
+      this.shadowRoot?.querySelector('.trigger')?.removeEventListener('click', this._onTriggerClick)
+    }
     if (this._onDocClick) document.removeEventListener('click', this._onDocClick)
     if (this._onDocKeydown) document.removeEventListener('keydown', this._onDocKeydown)
   }

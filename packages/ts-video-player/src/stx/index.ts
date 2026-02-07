@@ -353,7 +353,7 @@ function generateInitScript(id: string, lazy: boolean): string {
   var isLazy = container.hasAttribute('data-lazy');
 
   function initPlayer() {
-    if (typeof TSVideoPlayer === 'undefined') {
+    if (typeof VideoPlayer === 'undefined') {
       // Load the player library
       var script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/ts-video-player@latest/dist/index.min.js';
@@ -365,11 +365,11 @@ function generateInitScript(id: string, lazy: boolean): string {
   }
 
   function createPlayer() {
-    var player = TSVideoPlayer.createPlayer(container, config.options || {});
+    var player = VideoPlayer.createPlayer(container, config.options || {});
     if (config.src) {
       player.setSrc(config.src);
     }
-    container.__tsVideoPlayer = player;
+    container.__videoPlayer = player;
   }
 
   if (isLazy) {
@@ -399,8 +399,8 @@ function generateInitScript(id: string, lazy: boolean): string {
       initPlayer();
       // Wait for player to initialize then play
       var checkPlayer = setInterval(function() {
-        if (container.__tsVideoPlayer && container.__tsVideoPlayer.ready) {
-          container.__tsVideoPlayer.play();
+        if (container.__videoPlayer && container.__videoPlayer.ready) {
+          container.__videoPlayer.play();
           clearInterval(checkPlayer);
         }
       }, 100);

@@ -133,14 +133,20 @@ export abstract class BaseProvider implements Provider {
   // === Feature Availability ===
 
   getFeatureAvailability(feature: 'volume' | 'fullscreen' | 'pip'): FeatureAvailability {
-    const media = this.mediaElement as HTMLMediaElement | null
+    // Only pass media element if it's actually an HTMLMediaElement (not an iframe)
+    const el = this.mediaElement
+    const media = el instanceof HTMLMediaElement ? el : null
+    const video = el instanceof HTMLVideoElement ? el : null
+
     switch (feature) {
       case 'volume':
-        return detectVolumeAvailability(media)
+        // Iframe providers (YouTube/Vimeo) handle volume via their own API
+        return el && !(el instanceof HTMLMediaElement) ? 'available' : detectVolumeAvailability(media)
       case 'fullscreen':
-        return detectFullscreenAvailability(this.container, media as HTMLVideoElement | null)
+        return detectFullscreenAvailability(this.container, video)
       case 'pip':
-        return detectPipAvailability(media as HTMLVideoElement | null)
+        // PiP is not available for iframe embeds
+        return el && !(el instanceof HTMLMediaElement) ? 'unsupported' : detectPipAvailability(video)
       default:
         return 'unsupported'
     }

@@ -9,7 +9,7 @@
 import { resolvePlayer } from './utils'
 
 export class MediaVolumeSlider extends HTMLElement {
-  private _cleanup: (() => void) | null = null
+  private _cleanups: Array<() => void> = []
   private _isDragging = false
 
   connectedCallback(): void {
@@ -56,8 +56,8 @@ export class MediaVolumeSlider extends HTMLElement {
   }
 
   disconnectedCallback(): void {
-    this._cleanup?.()
-    this._cleanup = null
+    this._cleanups.forEach((fn) => fn())
+    this._cleanups = []
   }
 
   private attach(): void {
@@ -76,24 +76,21 @@ export class MediaVolumeSlider extends HTMLElement {
       if (volume > 0 && player.state.muted) player.setMuted(false)
     }
 
-    container.addEventListener('pointerdown', (e: PointerEvent) => {
+    const onPointerDown = (e: PointerEvent) => {
       this._isDragging = true
       container.setPointerCapture(e.pointerId)
       setFromEvent(e)
-    })
-
-    container.addEventListener('pointermove', (e: PointerEvent) => {
+    }
+    const onPointerMove = (e: PointerEvent) => {
       if (!this._isDragging) return
       setFromEvent(e)
-    })
-
-    container.addEventListener('pointerup', (e: PointerEvent) => {
+    }
+    const onPointerUp = (e: PointerEvent) => {
       if (!this._isDragging) return
       this._isDragging = false
       container.releasePointerCapture(e.pointerId)
-    })
-
-    container.addEventListener('keydown', (e: KeyboardEvent) => {
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
       let volume = player.state.volume
       const step = 0.05
 
@@ -107,10 +104,21 @@ export class MediaVolumeSlider extends HTMLElement {
 
       e.preventDefault()
       player.setVolume(volume)
-    })
+    }
+
+    container.addEventListener('pointerdown', onPointerDown)
+    container.addEventListener('pointermove', onPointerMove)
+    container.addEventListener('pointerup', onPointerUp)
+    container.addEventListener('keydown', onKeyDown)
+
+    this._cleanups.push(
+      () => container.removeEventListener('pointerdown', onPointerDown),
+      () => container.removeEventListener('pointermove', onPointerMove),
+      () => container.removeEventListener('pointerup', onPointerUp),
+      () => container.removeEventListener('keydown', onKeyDown),
+    )
 
     const unsub = player.subscribe((state: any) => {
-      // Hide when volume control unsupported
       if (state.volumeAvailability === 'unsupported') {
         this.setAttribute('hidden', '')
         return
@@ -125,6 +133,6 @@ export class MediaVolumeSlider extends HTMLElement {
       container.setAttribute('aria-valuenow', String(Math.round(percent)))
     })
 
-    this._cleanup = unsub
+    this._cleanups.push(unsub)
   }
 }

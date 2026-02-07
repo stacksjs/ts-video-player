@@ -9,7 +9,7 @@
 import { resolvePlayer, formatTime, formatTimePhrase } from './utils'
 
 export class MediaProgressBar extends HTMLElement {
-  private _cleanup: (() => void) | null = null
+  private _cleanups: Array<() => void> = []
   private _isDragging = false
 
   connectedCallback(): void {
@@ -61,8 +61,8 @@ export class MediaProgressBar extends HTMLElement {
   }
 
   disconnectedCallback(): void {
-    this._cleanup?.()
-    this._cleanup = null
+    this._cleanups.forEach((fn) => fn())
+    this._cleanups = []
   }
 
   private attach(): void {
@@ -82,24 +82,24 @@ export class MediaProgressBar extends HTMLElement {
       player.seekTo(time)
     }
 
-    container.addEventListener('pointerdown', (e: PointerEvent) => {
+    const onPointerDown = (e: PointerEvent) => {
       this._isDragging = true
       container.setPointerCapture(e.pointerId)
       seekFromEvent(e)
-    })
+    }
 
-    container.addEventListener('pointermove', (e: PointerEvent) => {
+    const onPointerMove = (e: PointerEvent) => {
       if (!this._isDragging) return
       seekFromEvent(e)
-    })
+    }
 
-    container.addEventListener('pointerup', (e: PointerEvent) => {
+    const onPointerUp = (e: PointerEvent) => {
       if (!this._isDragging) return
       this._isDragging = false
       container.releasePointerCapture(e.pointerId)
-    })
+    }
 
-    container.addEventListener('keydown', (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       const step = 5
       let newTime = player.state.currentTime
 
@@ -113,7 +113,19 @@ export class MediaProgressBar extends HTMLElement {
 
       e.preventDefault()
       player.seekTo(newTime)
-    })
+    }
+
+    container.addEventListener('pointerdown', onPointerDown)
+    container.addEventListener('pointermove', onPointerMove)
+    container.addEventListener('pointerup', onPointerUp)
+    container.addEventListener('keydown', onKeyDown)
+
+    this._cleanups.push(
+      () => container.removeEventListener('pointerdown', onPointerDown),
+      () => container.removeEventListener('pointermove', onPointerMove),
+      () => container.removeEventListener('pointerup', onPointerUp),
+      () => container.removeEventListener('keydown', onKeyDown),
+    )
 
     const unsub = player.subscribe((state: any) => {
       if (this._isDragging) return
@@ -132,6 +144,6 @@ export class MediaProgressBar extends HTMLElement {
       buffered.style.width = `${bufferedPct}%`
     })
 
-    this._cleanup = unsub
+    this._cleanups.push(unsub)
   }
 }

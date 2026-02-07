@@ -103,7 +103,7 @@ export class Player implements IPlayer {
     this._el.appendChild(mediaContainer)
 
     // Store reference
-    ;(this._el as any).__tsVideoPlayer = this
+    ;(this._el as any).__videoPlayer = this
   }
 
   private setupState(): void {
@@ -245,12 +245,14 @@ export class Player implements IPlayer {
     // Clear element
     this._el.classList.remove('ts-video-player')
     this._el.innerHTML = ''
-    delete (this._el as any).__tsVideoPlayer
+    delete (this._el as any).__videoPlayer
   }
 
   // === Source ===
 
   async setSrc(src: Src | Src[]): Promise<void> {
+    if (this._destroyed) return
+
     const sources = Array.isArray(src) ? src : [src]
     if (sources.length === 0) return
 
@@ -292,9 +294,11 @@ export class Player implements IPlayer {
       const mediaContainer = this._el.querySelector('.ts-video-player__container') as HTMLElement
       try {
         this._provider = await loader.load(mediaContainer, this._options)
+        if (this._destroyed) { this._provider.destroy(); this._provider = null; return }
         this._events.emit('providerchange', this._provider)
         this.attachProviderEvents(this._provider)
       } catch (error) {
+        if (this._destroyed) return
         this._store.batch({
           loadingState: 'error',
           error: { code: 5, message: 'Failed to load provider', details: error },
@@ -303,10 +307,13 @@ export class Player implements IPlayer {
       }
     }
 
+    if (this._destroyed) return
+
     // Load source
     try {
       await this._provider.load(firstSrc)
     } catch (error) {
+      if (this._destroyed) return
       this._store.batch({
         loadingState: 'error',
         error: { code: 4, message: 'Failed to load source', details: error },
@@ -650,5 +657,5 @@ export function createPlayer(container: HTMLElement | string, options?: PlayerOp
  * Get player instance from element
  */
 export function getPlayer(element: HTMLElement): Player | null {
-  return (element as any).__tsVideoPlayer || null
+  return (element as any).__videoPlayer || null
 }

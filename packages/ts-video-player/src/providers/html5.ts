@@ -171,6 +171,8 @@ export class HTML5Provider extends BaseProvider {
           volumeAvailability: availability,
         })
         this.events.emit('availabilitychange', 'volume', availability)
+      }).catch(() => {
+        // Volume probe failed — keep current availability state
       })
     })
 

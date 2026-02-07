@@ -1,7 +1,7 @@
 /**
  * ts-video-player CDN Entry Point
  *
- * Registers the library on `window.TSVideoPlayer` for script-tag usage.
+ * Registers the library on `window.VideoPlayer` for script-tag usage.
  * This file has side effects and should be listed in package.json sideEffects.
  *
  * @module cdn
@@ -27,7 +27,7 @@ import {
 import { registerElements } from './elements'
 
 if (typeof window !== 'undefined') {
-  (window as any).TSVideoPlayer = {
+  (window as any).VideoPlayer = {
     createPlayer,
     Player,
     EventEmitter,
