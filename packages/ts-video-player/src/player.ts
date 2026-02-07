@@ -38,6 +38,8 @@ export class Player implements IPlayer {
   private _loaders: ProviderLoader[]
   private _cleanupFns: Array<() => void> = []
   private _destroyed = false
+  private _loadingSource = false
+  private _announcer: HTMLElement | null = null
 
   /**
    * Create a new player instance
@@ -104,6 +106,19 @@ export class Player implements IPlayer {
     const mediaContainer = document.createElement('div')
     mediaContainer.className = 'ts-video-player__container'
     this._el.appendChild(mediaContainer)
+
+    // Create ARIA live region for screen reader announcements
+    if (this._options.announcements !== false) {
+      const liveRegion = document.createElement('div')
+      liveRegion.className = 'ts-video-player__announcer'
+      liveRegion.setAttribute('role', 'status')
+      liveRegion.setAttribute('aria-live', 'polite')
+      liveRegion.setAttribute('aria-atomic', 'true')
+      // Visually hidden but accessible to screen readers
+      liveRegion.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0'
+      this._el.appendChild(liveRegion)
+      this._announcer = liveRegion
+    }
 
     // Store reference
     ;(this._el as any).__videoPlayer = this
@@ -281,6 +296,18 @@ export class Player implements IPlayer {
     el.dataset.error = String(!!state.error)
   }
 
+  /**
+   * Announce a message to screen readers via the ARIA live region
+   */
+  private announce(message: string): void {
+    if (!this._announcer) return
+    // Clear and set to force re-announcement of same message
+    this._announcer.textContent = ''
+    requestAnimationFrame(() => {
+      if (this._announcer) this._announcer.textContent = message
+    })
+  }
+
   // === Lifecycle ===
 
   destroy(): void {
@@ -315,8 +342,14 @@ export class Player implements IPlayer {
   async setSrc(src: Src | Src[]): Promise<void> {
     if (this._destroyed) return
 
+    // Prevent concurrent source loading — abort previous if still in flight
+    if (this._loadingSource) {
+      this._loadingSource = false
+    }
+    this._loadingSource = true
+
     const sources = Array.isArray(src) ? src : [src]
-    if (sources.length === 0) return
+    if (sources.length === 0) { this._loadingSource = false; return }
 
     // Update state
     this._store.batch({
@@ -356,10 +389,13 @@ export class Player implements IPlayer {
       const mediaContainer = this._el.querySelector('.ts-video-player__container') as HTMLElement
       try {
         this._provider = await loader.load(mediaContainer, this._options)
-        if (this._destroyed) { this._provider.destroy(); this._provider = null; return }
+        if (this._destroyed || !this._loadingSource) {
+          this._provider.destroy(); this._provider = null; this._loadingSource = false; return
+        }
         this._events.emit('providerchange', this._provider)
         this.attachProviderEvents(this._provider)
       } catch (error) {
+        this._loadingSource = false
         if (this._destroyed) return
         this._store.batch({
           loadingState: 'error',
@@ -369,7 +405,7 @@ export class Player implements IPlayer {
       }
     }
 
-    if (this._destroyed) return
+    if (this._destroyed || !this._loadingSource) { this._loadingSource = false; return }
 
     // Load source
     try {
@@ -380,6 +416,8 @@ export class Player implements IPlayer {
         loadingState: 'error',
         error: { code: 4, message: 'Failed to load source', details: error },
       })
+    } finally {
+      this._loadingSource = false
     }
   }
 
@@ -415,11 +453,13 @@ export class Player implements IPlayer {
     provider.on('play', () => {
       this._store.batch({ paused: false, ended: false })
       this._events.emit('play')
+      this.announce('Playing')
     })
 
     provider.on('pause', () => {
       this._store.set('paused', true)
       this._events.emit('pause')
+      this.announce('Paused')
     })
 
     provider.on('playing', () => {
@@ -455,6 +495,11 @@ export class Player implements IPlayer {
     provider.on('volumechange', (volume, muted) => {
       this._store.batch({ volume, muted })
       this._events.emit('volumechange', volume, muted)
+      if (muted) {
+        this.announce('Muted')
+      } else {
+        this.announce(`Volume ${Math.round(volume * 100)}%`)
+      }
     })
 
     provider.on('ratechange', (rate) => {
@@ -473,6 +518,7 @@ export class Player implements IPlayer {
     provider.on('ended', () => {
       this._store.batch({ ended: true, playing: false, playbackState: 'ended' })
       this._events.emit('ended')
+      this.announce('Playback ended')
 
       // Handle loop
       if (this.state.loop) {
@@ -484,6 +530,7 @@ export class Player implements IPlayer {
     provider.on('error', (error) => {
       this._store.batch({ loadingState: 'error', error })
       this._events.emit('error', error)
+      this.announce(`Error: ${error.message}`)
     })
 
     provider.on('statechange', (state) => {
@@ -499,6 +546,7 @@ export class Player implements IPlayer {
     provider.on('fullscreenchange', (fullscreen) => {
       this._store.set('fullscreen', fullscreen)
       this._events.emit('fullscreenchange', fullscreen)
+      this.announce(fullscreen ? 'Entered fullscreen' : 'Exited fullscreen')
     })
 
     provider.on('pipchange', (pip) => {
@@ -527,7 +575,9 @@ export class Player implements IPlayer {
 
   togglePlay(): void {
     if (this.state.paused) {
-      this.play()
+      this.play().catch(() => {
+        // Play rejection is already handled and emitted as error by provider
+      })
     } else {
       this.pause()
     }

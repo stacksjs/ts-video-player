@@ -160,7 +160,7 @@ declare global {
 // HLS Provider
 // =============================================================================
 
-const HLS_CDN = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js'
+const HLS_CDN_DEFAULT = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js'
 
 /**
  * HLS streaming provider
@@ -241,15 +241,24 @@ export class HLSProvider extends BaseProvider {
       await this.loadHLSLibrary()
     }
 
-    // Emit dimensions on load
+    // Emit dimensions and feature availability on load
     this.video.addEventListener('loadedmetadata', () => {
+      const fullscreenAvailability = this.getFeatureAvailability('fullscreen')
+      const pipAvailability = this.getFeatureAvailability('pip')
+      const volumeAvailability = this.getFeatureAvailability('volume')
       this.events.emit('statechange', {
         videoWidth: this.video!.videoWidth,
         videoHeight: this.video!.videoHeight,
-        aspectRatio: this.video!.videoWidth / this.video!.videoHeight || 16 / 9,
-        canFullscreen: this.checkFullscreenSupport(),
-        canPictureInPicture: this.checkPiPSupport(),
+        aspectRatio: (this.video!.videoHeight > 0 ? this.video!.videoWidth / this.video!.videoHeight : 0) || 16 / 9,
+        canFullscreen: fullscreenAvailability === 'available',
+        canPictureInPicture: pipAvailability === 'available',
+        fullscreenAvailability,
+        pipAvailability,
+        volumeAvailability,
       })
+      this.events.emit('availabilitychange', 'fullscreen', fullscreenAvailability)
+      this.events.emit('availabilitychange', 'pip', pipAvailability)
+      this.events.emit('availabilitychange', 'volume', volumeAvailability)
     })
   }
 
@@ -258,7 +267,7 @@ export class HLSProvider extends BaseProvider {
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script')
-      script.src = HLS_CDN
+      script.src = this.options.hlsCdnUrl || HLS_CDN_DEFAULT
       script.async = true
       script.onload = () => resolve()
       script.onerror = () => reject(new Error('Failed to load HLS.js'))
@@ -452,7 +461,15 @@ export class HLSProvider extends BaseProvider {
 
   async play(): Promise<void> {
     if (!this.video) return
-    await this.video.play()
+    try {
+      await this.video.play()
+    } catch (error) {
+      if ((error as Error).name === 'NotAllowedError') {
+        this.emitError(1, 'Playback was blocked. User interaction required.', error)
+      } else {
+        throw error
+      }
+    }
   }
 
   pause(): void {
@@ -579,20 +596,6 @@ export class HLSProvider extends BaseProvider {
     this.events.emit('texttrackchange', current || null)
   }
 
-  // === Helpers ===
-
-  private checkFullscreenSupport(): boolean {
-    return !!(
-      document.fullscreenEnabled ||
-      (document as any).webkitFullscreenEnabled ||
-      (document as any).mozFullScreenEnabled ||
-      (document as any).msFullscreenEnabled
-    )
-  }
-
-  private checkPiPSupport(): boolean {
-    return !!(this.video && 'requestPictureInPicture' in this.video)
-  }
 }
 
 /**

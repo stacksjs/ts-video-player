@@ -462,6 +462,7 @@ export function createGestureDetector(element: HTMLElement, handlers: GestureHan
   let startTime = 0
   let lastTap = 0
   let isScrubbing = false
+  let cachedRect: DOMRect | null = null
 
   const SWIPE_THRESHOLD = 50
   const TAP_THRESHOLD = 200
@@ -473,6 +474,7 @@ export function createGestureDetector(element: HTMLElement, handlers: GestureHan
     startY = touch.clientY
     startTime = Date.now()
     isScrubbing = false
+    cachedRect = element.getBoundingClientRect()
   }
 
   const onTouchMove = (e: TouchEvent) => {
@@ -485,8 +487,8 @@ export function createGestureDetector(element: HTMLElement, handlers: GestureHan
     // Horizontal scrubbing
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 20) {
       isScrubbing = true
-      const rect = element.getBoundingClientRect()
-      const progress = Math.max(0, Math.min(1, touch.clientX / rect.width))
+      const rect = cachedRect || element.getBoundingClientRect()
+      const progress = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width))
       handlers.onScrub?.(progress)
     }
   }

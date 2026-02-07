@@ -409,7 +409,15 @@ export class VimeoProvider extends BaseProvider {
   // === Playback ===
 
   async play(): Promise<void> {
-    await this.player?.play()
+    try {
+      await this.player?.play()
+    } catch (error) {
+      if ((error as Error).name === 'NotAllowedError') {
+        this.emitError(1, 'Playback was blocked. User interaction required.', error)
+      } else {
+        throw error
+      }
+    }
   }
 
   pause(): void {

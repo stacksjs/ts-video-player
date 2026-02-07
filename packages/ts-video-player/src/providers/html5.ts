@@ -150,7 +150,7 @@ export class HTML5Provider extends BaseProvider {
         this.events.emit('statechange', {
           videoWidth: video.videoWidth,
           videoHeight: video.videoHeight,
-          aspectRatio: video.videoWidth / video.videoHeight || 16 / 9,
+          aspectRatio: (video.videoHeight > 0 ? video.videoWidth / video.videoHeight : 0) || 16 / 9,
           canFullscreen: fullscreenAvailability === 'available',
           canPictureInPicture: pipAvailability === 'available',
           fullscreenAvailability,

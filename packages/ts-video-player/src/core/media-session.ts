@@ -103,7 +103,9 @@ export function createMediaSession(
   const unsubPlaying = store.subscribe('playing', (state) => {
     if (state.playing) {
       updatePosition()
-      positionTimer = setInterval(updatePosition, 1000)
+      if (!positionTimer) {
+        positionTimer = setInterval(updatePosition, 1000)
+      }
     } else {
       if (positionTimer) { clearInterval(positionTimer); positionTimer = null }
       updatePosition()

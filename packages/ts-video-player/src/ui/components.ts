@@ -334,6 +334,8 @@ export class Slider extends BaseComponent {
   private fill: HTMLElement | null = null
   private thumb: HTMLElement | null = null
   private isDragging = false
+  private boundPointerMove: (e: PointerEvent) => void
+  private boundPointerUp: (e: PointerEvent) => void
 
   constructor(options: SliderOptions) {
     super()
@@ -342,6 +344,8 @@ export class Slider extends BaseComponent {
       disabled: false,
       ...options,
     }
+    this.boundPointerMove = this.onPointerMove.bind(this)
+    this.boundPointerUp = this.onPointerUp.bind(this)
   }
 
   protected createElement(): HTMLElement {
@@ -372,8 +376,8 @@ export class Slider extends BaseComponent {
 
     // Pointer events
     this.element.addEventListener('pointerdown', this.onPointerDown.bind(this))
-    document.addEventListener('pointermove', this.onPointerMove.bind(this))
-    document.addEventListener('pointerup', this.onPointerUp.bind(this))
+    document.addEventListener('pointermove', this.boundPointerMove)
+    document.addEventListener('pointerup', this.boundPointerUp)
 
     // Keyboard events
     this.element.addEventListener('keydown', this.onKeyDown.bind(this))
@@ -478,8 +482,8 @@ export class Slider extends BaseComponent {
   }
 
   destroy(): void {
-    document.removeEventListener('pointermove', this.onPointerMove.bind(this))
-    document.removeEventListener('pointerup', this.onPointerUp.bind(this))
+    document.removeEventListener('pointermove', this.boundPointerMove)
+    document.removeEventListener('pointerup', this.boundPointerUp)
     super.destroy()
   }
 }
@@ -670,18 +674,22 @@ export class Menu extends BaseComponent {
     trigger?.addEventListener('click', () => this.toggle())
 
     // Close on outside click
-    document.addEventListener('click', (e) => {
+    const onDocClick = (e: Event) => {
       if (this.isOpen && !this.element?.contains(e.target as Node)) {
         this.close()
       }
-    })
+    }
+    document.addEventListener('click', onDocClick)
+    this.unsubscribes.push(() => document.removeEventListener('click', onDocClick))
 
     // Close on escape
-    document.addEventListener('keydown', (e) => {
+    const onDocKeydown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && this.isOpen) {
         this.close()
       }
-    })
+    }
+    document.addEventListener('keydown', onDocKeydown)
+    this.unsubscribes.push(() => document.removeEventListener('keydown', onDocKeydown))
   }
 
   toggle(): void {
@@ -736,15 +744,20 @@ export class Menu extends BaseComponent {
 export function formatTime(seconds: number): string {
   if (!isFinite(seconds) || isNaN(seconds)) return '0:00'
 
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
+  const negative = seconds < 0
+  const abs = Math.abs(seconds)
+
+  const h = Math.floor(abs / 3600)
+  const m = Math.floor((abs % 3600) / 60)
+  const s = Math.floor(abs % 60)
+
+  const prefix = negative ? '-' : ''
 
   if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    return `${prefix}${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
-  return `${m}:${s.toString().padStart(2, '0')}`
+  return `${prefix}${m}:${s.toString().padStart(2, '0')}`
 }
 
 // =============================================================================

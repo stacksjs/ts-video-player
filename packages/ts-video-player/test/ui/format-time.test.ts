@@ -40,6 +40,12 @@ describe('formatTime', () => {
     expect(formatTime(-Infinity)).toBe('0:00')
   })
 
+  test('handles negative numbers', () => {
+    expect(formatTime(-65)).toBe('-1:05')
+    expect(formatTime(-5)).toBe('-0:05')
+    expect(formatTime(-3661)).toBe('-1:01:01')
+  })
+
   test('pads seconds correctly', () => {
     expect(formatTime(61)).toBe('1:01')
     expect(formatTime(69)).toBe('1:09')

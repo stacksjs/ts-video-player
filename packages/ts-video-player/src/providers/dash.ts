@@ -65,10 +65,12 @@ export interface DASHProviderConfig {
 let dashjs: any = null
 let dashLoading: Promise<any> | null = null
 
+const DASH_CDN_DEFAULT = 'https://cdn.dashjs.org/latest/dash.all.min.js'
+
 /**
  * Load dash.js from CDN
  */
-async function loadDashJS(): Promise<any> {
+async function loadDashJS(cdnUrl?: string): Promise<any> {
   if (dashjs) return dashjs
 
   if (dashLoading) return dashLoading
@@ -82,7 +84,7 @@ async function loadDashJS(): Promise<any> {
     }
 
     const script = document.createElement('script')
-    script.src = 'https://cdn.dashjs.org/latest/dash.all.min.js'
+    script.src = cdnUrl || DASH_CDN_DEFAULT
     script.async = true
 
     script.onload = () => {
@@ -150,7 +152,7 @@ export class DASHProvider extends BaseProvider {
     this.video.style.display = 'block'
 
     // Load dash.js
-    await loadDashJS()
+    await loadDashJS(this.options.dashCdnUrl)
 
     // Create player instance
     this.dash = dashjs.MediaPlayer().create()
@@ -218,7 +220,25 @@ export class DASHProvider extends BaseProvider {
       }
       this.events.emit('progress', ranges)
     })
-    this.video.addEventListener('loadedmetadata', () => this.events.emit('loadedmetadata'))
+    this.video.addEventListener('loadedmetadata', () => {
+      this.events.emit('loadedmetadata')
+      const fullscreenAvailability = this.getFeatureAvailability('fullscreen')
+      const pipAvailability = this.getFeatureAvailability('pip')
+      const volumeAvailability = this.getFeatureAvailability('volume')
+      this.events.emit('statechange', {
+        videoWidth: this.video!.videoWidth,
+        videoHeight: this.video!.videoHeight,
+        aspectRatio: (this.video!.videoHeight > 0 ? this.video!.videoWidth / this.video!.videoHeight : 0) || 16 / 9,
+        canFullscreen: fullscreenAvailability === 'available',
+        canPictureInPicture: pipAvailability === 'available',
+        fullscreenAvailability,
+        pipAvailability,
+        volumeAvailability,
+      })
+      this.events.emit('availabilitychange', 'fullscreen', fullscreenAvailability)
+      this.events.emit('availabilitychange', 'pip', pipAvailability)
+      this.events.emit('availabilitychange', 'volume', volumeAvailability)
+    })
     this.video.addEventListener('loadeddata', () => this.events.emit('loadeddata'))
     this.video.addEventListener('canplay', () => this.events.emit('canplay'))
     this.video.addEventListener('canplaythrough', () => this.events.emit('canplaythrough'))
@@ -298,7 +318,8 @@ export class DASHProvider extends BaseProvider {
       this.source = src as DASHSource
     }
     else {
-      throw new Error('Invalid DASH source')
+      this.emitError(4, 'Invalid DASH source')
+      return
     }
 
     // Configure DRM if provided
@@ -339,8 +360,15 @@ export class DASHProvider extends BaseProvider {
   // ==========================================================================
 
   async play(): Promise<void> {
-    if (this.video) {
+    if (!this.video) return
+    try {
       await this.video.play()
+    } catch (error) {
+      if ((error as Error).name === 'NotAllowedError') {
+        this.emitError(1, 'Playback was blocked. User interaction required.', error)
+      } else {
+        throw error
+      }
     }
   }
 

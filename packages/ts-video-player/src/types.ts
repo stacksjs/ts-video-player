@@ -372,8 +372,12 @@ export interface PlayerOptions {
   // === Providers ===
   /** HLS.js configuration */
   hlsConfig?: Record<string, unknown>
+  /** Custom HLS.js CDN URL (overrides default jsdelivr URL) */
+  hlsCdnUrl?: string
   /** dash.js configuration */
   dashConfig?: Record<string, unknown>
+  /** Custom dash.js CDN URL (overrides default dashjs.org URL) */
+  dashCdnUrl?: string
   /** YouTube player parameters */
   youtubeParams?: Record<string, string | number | boolean>
   /** Vimeo player parameters */
