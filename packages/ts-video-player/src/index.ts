@@ -536,40 +536,62 @@ import { createPlayer } from './player'
 export default createPlayer
 
 // =============================================================================
-// Global Registration (for CDN usage)
+// Feature Availability Detection
 // =============================================================================
 
-if (typeof window !== 'undefined') {
-  (window as any).TSVideoPlayer = {
-    createPlayer,
-    Player: require('./player').Player,
-    EventEmitter: require('./core/events').EventEmitter,
-    StateStore: require('./core/state').StateStore,
-    HTML5Provider: require('./providers').HTML5Provider,
-    YouTubeProvider: require('./providers').YouTubeProvider,
-    HLSProvider: require('./providers').HLSProvider,
-    DASHProvider: require('./providers').DASHProvider,
-    // Theming
-    applyTheme: require('./core/themes').applyTheme,
-    presetThemes: require('./core/themes').presetThemes,
-    // i18n
-    I18n: require('./core/i18n').I18n,
-    t: require('./core/i18n').t,
-    // Layouts
-    layouts: require('./layouts').layouts,
-    createLayoutManager: require('./layouts').createLayoutManager,
-    // Plugins
-    plugins: {
-      VideoAnalytics: require('./plugins').VideoAnalytics,
-      analyticsPlugin: require('./plugins').analyticsPlugin,
-      AdsManager: require('./plugins').AdsManager,
-      adsPlugin: require('./plugins').adsPlugin,
-      SkipSegmentsManager: require('./plugins').SkipSegmentsManager,
-      skipSegmentsPlugin: require('./plugins').skipSegmentsPlugin,
-      EndScreenManager: require('./plugins').EndScreenManager,
-      endScreenPlugin: require('./plugins').endScreenPlugin,
-      WatermarkManager: require('./plugins').WatermarkManager,
-      watermarkPlugin: require('./plugins').watermarkPlugin,
-    },
-  }
-}
+export {
+  isIOSSafari,
+  isSafari,
+  isStandalonePWA,
+  detectVolumeAvailability,
+  probeVolumeAvailability,
+  detectFullscreenAvailability,
+  isVideoOnlyFullscreen,
+  detectPipAvailability,
+  detectAllFeatures,
+  enterFullscreen,
+  exitFullscreen,
+  enterPiP,
+  exitPiP,
+} from './core/features'
+
+// =============================================================================
+// Custom Elements
+// =============================================================================
+
+export {
+  VideoPlayerElement,
+  MediaPlayButton,
+  MediaMuteButton,
+  MediaFullscreenButton,
+  MediaPipButton,
+  MediaTimeDisplay,
+  MediaProgressBar,
+  MediaVolumeSlider,
+  MediaSettingsMenu,
+  registerElements,
+  formatTime as formatElementTime,
+  formatTimePhrase,
+  toISODuration,
+} from './elements'
+
+// =============================================================================
+// Composable Features
+// =============================================================================
+
+export {
+  playback,
+  volume as volumeFeature,
+  fullscreen as fullscreenFeature,
+  pip as pipFeature,
+  captions as captionsFeature,
+  quality as qualityFeature,
+  keyboard as keyboardFeature,
+  gestures as gesturesFeature,
+  videoFeatures,
+  audioFeatures,
+  minimalFeatures,
+  createComposablePlayer,
+} from './features'
+
+export type { Feature, FeatureContext, ComposablePlayer, ComposablePlayerOptions } from './features'

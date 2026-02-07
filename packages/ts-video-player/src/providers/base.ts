@@ -16,8 +16,18 @@ import type {
   AudioTrack,
   TextTrack,
   MediaError,
+  FeatureAvailability,
 } from '../types'
 import { EventEmitter } from '../core/events'
+import {
+  detectVolumeAvailability,
+  detectFullscreenAvailability,
+  detectPipAvailability,
+  enterFullscreen as fsEnter,
+  exitFullscreen as fsExit,
+  enterPiP as pipEnter,
+  exitPiP as pipExit,
+} from '../core/features'
 
 /**
  * Abstract base provider implementation
@@ -120,33 +130,30 @@ export abstract class BaseProvider implements Provider {
     // Override in subclass if supported
   }
 
-  // === Fullscreen ===
+  // === Feature Availability ===
 
-  async enterFullscreen(): Promise<void> {
-    const el = this.getFullscreenElement()
-    if (!el) return
-
-    if (el.requestFullscreen) {
-      await el.requestFullscreen()
-    } else if ((el as any).webkitRequestFullscreen) {
-      await (el as any).webkitRequestFullscreen()
-    } else if ((el as any).mozRequestFullScreen) {
-      await (el as any).mozRequestFullScreen()
-    } else if ((el as any).msRequestFullscreen) {
-      await (el as any).msRequestFullscreen()
+  getFeatureAvailability(feature: 'volume' | 'fullscreen' | 'pip'): FeatureAvailability {
+    const media = this.mediaElement as HTMLMediaElement | null
+    switch (feature) {
+      case 'volume':
+        return detectVolumeAvailability(media)
+      case 'fullscreen':
+        return detectFullscreenAvailability(this.container, media as HTMLVideoElement | null)
+      case 'pip':
+        return detectPipAvailability(media as HTMLVideoElement | null)
+      default:
+        return 'unsupported'
     }
   }
 
+  // === Fullscreen ===
+
+  async enterFullscreen(): Promise<void> {
+    await fsEnter(this.container, this.mediaElement as HTMLMediaElement | null)
+  }
+
   async exitFullscreen(): Promise<void> {
-    if (document.exitFullscreen) {
-      await document.exitFullscreen()
-    } else if ((document as any).webkitExitFullscreen) {
-      await (document as any).webkitExitFullscreen()
-    } else if ((document as any).mozCancelFullScreen) {
-      await (document as any).mozCancelFullScreen()
-    } else if ((document as any).msExitFullscreen) {
-      await (document as any).msExitFullscreen()
-    }
+    await fsExit(this.mediaElement as HTMLMediaElement | null)
   }
 
   protected getFullscreenElement(): HTMLElement | null {
@@ -156,16 +163,13 @@ export abstract class BaseProvider implements Provider {
   // === Picture-in-Picture ===
 
   async enterPiP(): Promise<void> {
-    const video = this.mediaElement as HTMLVideoElement
-    if (video && 'requestPictureInPicture' in video) {
-      await video.requestPictureInPicture()
-    }
+    const media = this.mediaElement as HTMLMediaElement | null
+    if (!media) return
+    await pipEnter(media)
   }
 
   async exitPiP(): Promise<void> {
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture()
-    }
+    await pipExit(this.mediaElement as HTMLMediaElement | null)
   }
 
   // === Events ===

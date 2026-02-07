@@ -18,6 +18,7 @@ import type {
 } from '../types'
 import { BaseProvider } from './base'
 import { MediaEventsNormalizer, onFullscreenChange, onPiPChange } from '../core/events'
+import { probeVolumeAvailability } from '../core/features'
 
 /**
  * Check if a source is an HTML5 compatible source
@@ -139,17 +140,48 @@ export class HTML5Provider extends BaseProvider {
       })
     }
 
-    // Emit state for dimensions
+    // Emit state for dimensions and feature availability
     if (!this.isAudio) {
       this.media.addEventListener('loadedmetadata', () => {
         const video = this.media as HTMLVideoElement
+        const fullscreenAvailability = this.getFeatureAvailability('fullscreen')
+        const pipAvailability = this.getFeatureAvailability('pip')
+        const volumeAvailability = this.getFeatureAvailability('volume')
         this.events.emit('statechange', {
           videoWidth: video.videoWidth,
           videoHeight: video.videoHeight,
           aspectRatio: video.videoWidth / video.videoHeight || 16 / 9,
-          canFullscreen: this.checkFullscreenSupport(),
-          canPictureInPicture: this.checkPiPSupport(),
+          canFullscreen: fullscreenAvailability === 'available',
+          canPictureInPicture: pipAvailability === 'available',
+          fullscreenAvailability,
+          pipAvailability,
+          volumeAvailability,
         })
+        this.events.emit('availabilitychange', 'fullscreen', fullscreenAvailability)
+        this.events.emit('availabilitychange', 'pip', pipAvailability)
+        this.events.emit('availabilitychange', 'volume', volumeAvailability)
+      })
+    }
+
+    // Async volume probe after loadeddata
+    this.media.addEventListener('loadeddata', () => {
+      if (!this.media) return
+      probeVolumeAvailability(this.media).then((availability) => {
+        this.events.emit('statechange', {
+          volumeAvailability: availability,
+        })
+        this.events.emit('availabilitychange', 'volume', availability)
+      })
+    })
+
+    // iOS Safari PiP via webkitpresentationmodechanged
+    if (!this.isAudio && this.media instanceof HTMLVideoElement) {
+      this.media.addEventListener('webkitpresentationmodechanged', () => {
+        const video = this.media as any
+        if (video?.webkitPresentationMode) {
+          const isPiP = video.webkitPresentationMode === 'picture-in-picture'
+          this.events.emit('pipchange', isPiP)
+        }
       })
     }
   }
@@ -363,21 +395,6 @@ export class HTML5Provider extends BaseProvider {
     }
 
     this.events.emit('audiotrackchange', this.getAudioTracks().find((t) => t.selected) || null)
-  }
-
-  // === Helpers ===
-
-  private checkFullscreenSupport(): boolean {
-    return !!(
-      document.fullscreenEnabled ||
-      (document as any).webkitFullscreenEnabled ||
-      (document as any).mozFullScreenEnabled ||
-      (document as any).msFullscreenEnabled
-    )
-  }
-
-  private checkPiPSupport(): boolean {
-    return !!(this.media && 'requestPictureInPicture' in this.media)
   }
 
   // === Add Text Track ===

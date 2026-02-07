@@ -200,9 +200,13 @@ export class FullscreenButton extends BaseComponent {
 
   update(state: PlayerState): void {
     if (!this.element) return
-    this.element.setAttribute('aria-label', state.fullscreen ? 'Exit fullscreen' : 'Enter fullscreen')
-    this.element.innerHTML = ''
-    this.element.appendChild(this.getIcon(state.fullscreen))
+    const btn = this.element as HTMLButtonElement
+    const disabled = state.fullscreenAvailability !== 'available'
+    btn.disabled = disabled
+    btn.style.display = state.fullscreenAvailability === 'unsupported' ? 'none' : ''
+    btn.setAttribute('aria-label', state.fullscreen ? 'Exit fullscreen' : 'Enter fullscreen')
+    btn.innerHTML = ''
+    btn.appendChild(this.getIcon(state.fullscreen))
   }
 
   private getIcon(fullscreen: boolean): HTMLElement {
@@ -243,6 +247,14 @@ export class PiPButton extends BaseComponent {
     this.element?.addEventListener('click', () => {
       this.player?.togglePiP()
     })
+  }
+
+  update(state: PlayerState): void {
+    if (!this.element) return
+    const btn = this.element as HTMLButtonElement
+    const disabled = state.pipAvailability !== 'available'
+    btn.disabled = disabled
+    btn.style.display = state.pipAvailability === 'unsupported' ? 'none' : ''
   }
 
   private getIcon(): HTMLElement {
@@ -574,6 +586,9 @@ export class VolumeSlider extends BaseComponent {
 
   update(state: PlayerState): void {
     if (!this.slider) return
+    if (this.element) {
+      this.element.style.display = state.volumeAvailability === 'unsupported' ? 'none' : ''
+    }
     this.slider.setValue(state.muted ? 0 : state.volume)
   }
 

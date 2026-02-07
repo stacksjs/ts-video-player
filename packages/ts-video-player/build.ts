@@ -7,9 +7,13 @@ import { build } from 'bun'
 async function main() {
   console.log('Building ts-video-player...')
 
-  // Build ESM
+  // Build ESM (main + sub-entries with code splitting)
   await build({
-    entrypoints: ['./src/index.ts'],
+    entrypoints: [
+      './src/index.ts',
+      './src/elements/index.ts',
+      './src/features/index.ts',
+    ],
     outdir: './dist',
     target: 'browser',
     format: 'esm',
@@ -20,7 +24,7 @@ async function main() {
 
   // Build minified for CDN
   await build({
-    entrypoints: ['./src/index.ts'],
+    entrypoints: ['./src/cdn.ts'],
     outdir: './dist',
     target: 'browser',
     format: 'esm',
@@ -33,6 +37,26 @@ async function main() {
   await build({
     entrypoints: ['./src/stx/index.ts'],
     outdir: './dist/stx',
+    target: 'browser',
+    format: 'esm',
+    sourcemap: 'external',
+    minify: false,
+  })
+
+  // Build UI separately
+  await build({
+    entrypoints: ['./src/ui/index.ts'],
+    outdir: './dist/ui',
+    target: 'browser',
+    format: 'esm',
+    sourcemap: 'external',
+    minify: false,
+  })
+
+  // Build plugins separately
+  await build({
+    entrypoints: ['./src/plugins/index.ts'],
+    outdir: './dist/plugins',
     target: 'browser',
     format: 'esm',
     sourcemap: 'external',

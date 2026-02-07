@@ -130,6 +130,11 @@ export function createDefaultState(): PlayerState {
     canFullscreen: false,
     canPictureInPicture: false,
 
+    // Feature Availability
+    volumeAvailability: 'unavailable',
+    fullscreenAvailability: 'unavailable',
+    pipAvailability: 'unavailable',
+
     // UI
     controlsVisible: true,
     userActive: true,
@@ -328,6 +333,25 @@ export function selectCurrentTextTrack(state: PlayerState): string | null {
 export function selectCurrentAudioTrack(state: PlayerState): string | null {
   const selected = state.audioTracks.find((t) => t.selected)
   return selected?.label || null
+}
+
+// =============================================================================
+// Deprecated Selectors (use availability states instead)
+// =============================================================================
+
+/** @deprecated Use `state.fullscreenAvailability === 'available'` instead */
+export function selectCanFullscreen(state: PlayerState): boolean {
+  return state.fullscreenAvailability === 'available'
+}
+
+/** @deprecated Use `state.pipAvailability === 'available'` instead */
+export function selectCanPiP(state: PlayerState): boolean {
+  return state.pipAvailability === 'available'
+}
+
+/** @deprecated Use `state.volumeAvailability === 'available'` instead */
+export function selectCanSetVolume(state: PlayerState): boolean {
+  return state.volumeAvailability === 'available'
 }
 
 // =============================================================================

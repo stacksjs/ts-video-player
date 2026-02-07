@@ -436,6 +436,13 @@ export class Player implements IPlayer {
       this._store.set('pictureInPicture', pip)
       this._events.emit('pipchange', pip)
     })
+
+    provider.on('availabilitychange', (feature, availability) => {
+      if (feature === 'volume') this._store.set('volumeAvailability', availability)
+      else if (feature === 'fullscreen') this._store.set('fullscreenAvailability', availability)
+      else if (feature === 'pip') this._store.set('pipAvailability', availability)
+      this._events.emit('availabilitychange', feature, availability)
+    })
   }
 
   // === Playback ===
@@ -476,6 +483,7 @@ export class Player implements IPlayer {
   // === Volume ===
 
   setVolume(volume: number): void {
+    if (this.state.volumeAvailability === 'unsupported') return
     const clamped = Math.max(0, Math.min(1, volume))
     this._provider?.setVolume(clamped)
     this._store.set('volume', clamped)
@@ -501,6 +509,7 @@ export class Player implements IPlayer {
   // === Fullscreen ===
 
   async enterFullscreen(): Promise<void> {
+    if (this.state.fullscreenAvailability === 'unsupported') return
     await this._provider?.enterFullscreen()
   }
 
@@ -519,6 +528,7 @@ export class Player implements IPlayer {
   // === Picture-in-Picture ===
 
   async enterPiP(): Promise<void> {
+    if (this.state.pipAvailability === 'unsupported') return
     await this._provider?.enterPiP()
   }
 
@@ -581,6 +591,15 @@ export class Player implements IPlayer {
 
   once<K extends keyof PlayerEventMap>(event: K, handler: PlayerEventMap[K]): void {
     this._events.once(event, handler)
+  }
+
+  // === State Subscription ===
+
+  subscribe(
+    keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
+    listener?: (state: PlayerState, key?: keyof PlayerState) => void,
+  ): () => void {
+    return this._store.subscribe(keyOrListener, listener)
   }
 }
 

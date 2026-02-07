@@ -121,6 +121,14 @@ export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error'
 export type PlaybackState = 'idle' | 'buffering' | 'playing' | 'paused' | 'ended'
 
 /**
+ * Feature availability state.
+ * - 'available': Feature is supported and can be used right now
+ * - 'unavailable': Feature could work but isn't ready yet (e.g., waiting for media to load)
+ * - 'unsupported': Feature is not supported on this platform/browser
+ */
+export type FeatureAvailability = 'available' | 'unavailable' | 'unsupported'
+
+/**
  * Time range representation
  */
 export interface TimeRange {
@@ -271,10 +279,18 @@ export interface PlayerState {
   fullscreen: boolean
   /** Whether Picture-in-Picture is active */
   pictureInPicture: boolean
-  /** Whether fullscreen is supported */
+  /** @deprecated Use fullscreenAvailability instead */
   canFullscreen: boolean
-  /** Whether PiP is supported */
+  /** @deprecated Use pipAvailability instead */
   canPictureInPicture: boolean
+
+  // === Feature Availability ===
+  /** Volume control availability (iOS Safari silently ignores volume changes) */
+  volumeAvailability: FeatureAvailability
+  /** Fullscreen API availability */
+  fullscreenAvailability: FeatureAvailability
+  /** Picture-in-Picture availability */
+  pipAvailability: FeatureAvailability
 
   // === UI ===
   /** Whether controls are visible */
@@ -529,6 +545,10 @@ export interface Provider {
   /** Exit Picture-in-Picture */
   exitPiP(): Promise<void>
 
+  // === Feature Availability ===
+  /** Check feature availability */
+  getFeatureAvailability(feature: 'volume' | 'fullscreen' | 'pip'): FeatureAvailability
+
   // === Events ===
   /** Add event listener */
   on<K extends keyof ProviderEventMap>(event: K, handler: ProviderEventMap[K]): void
@@ -596,6 +616,7 @@ export interface ProviderEventMap {
   texttrackchange: (track: TextTrack | null) => void
   fullscreenchange: (fullscreen: boolean) => void
   pipchange: (pip: boolean) => void
+  availabilitychange: (feature: string, availability: FeatureAvailability) => void
 }
 
 /**
@@ -715,6 +736,12 @@ export interface Player {
   setQuality(quality: VideoQuality | 'auto'): void
   setTextTrack(trackId: string, mode: 'disabled' | 'hidden' | 'showing'): void
   setAudioTrack(trackId: string): void
+
+  // State Subscription
+  subscribe(
+    keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
+    listener?: (state: PlayerState, key?: keyof PlayerState) => void,
+  ): () => void
 
   // Events
   on<K extends keyof PlayerEventMap>(event: K, handler: PlayerEventMap[K]): void
