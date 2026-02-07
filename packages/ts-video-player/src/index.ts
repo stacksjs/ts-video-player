@@ -595,3 +595,36 @@ export {
 } from './features'
 
 export type { Feature, FeatureContext, ComposablePlayer, ComposablePlayerOptions } from './features'
+
+// =============================================================================
+// Media Session
+// =============================================================================
+
+export {
+  isMediaSessionSupported,
+  createMediaSession,
+  updateMetadata,
+} from './core/media-session'
+
+export type { MediaSessionOptions } from './core/media-session'
+
+// =============================================================================
+// Orientation Lock
+// =============================================================================
+
+export {
+  isOrientationLockSupported,
+  lockOrientation,
+  unlockOrientation,
+} from './core/orientation'
+
+// =============================================================================
+// Popover Positioning
+// =============================================================================
+
+export {
+  computePosition,
+  applyPosition,
+} from './core/popover'
+
+export type { Rect, Placement, PositionOptions, PositionResult } from './core/popover'

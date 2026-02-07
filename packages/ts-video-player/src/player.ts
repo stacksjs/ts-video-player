@@ -18,6 +18,8 @@ import type {
 } from './types'
 import { StateStore, createStorageSync, selectBufferedAmount } from './core/state'
 import { EventEmitter, createKeyboardHandler, createActivityDetector, type KeyboardActions } from './core/events'
+import { createMediaSession, type MediaSessionOptions } from './core/media-session'
+import { lockOrientation, unlockOrientation } from './core/orientation'
 import { defaultLoaders, findLoader, detectMediaType } from './providers'
 
 // =============================================================================
@@ -60,6 +62,7 @@ export class Player implements IPlayer {
     this.setupKeyboard()
     this.setupActivity()
     this.setupStorage()
+    this.setupMediaSession()
     this.setupEvents()
 
     // Load initial source
@@ -196,6 +199,31 @@ export class Player implements IPlayer {
     this._cleanupFns.push(cleanup)
   }
 
+  private setupMediaSession(): void {
+    if (this._options.mediaSession === false) return
+
+    const sessionOpts: MediaSessionOptions | undefined =
+      typeof this._options.mediaSession === 'object'
+        ? this._options.mediaSession
+        : this._options.title
+          ? { title: this._options.title }
+          : undefined
+
+    const cleanup = createMediaSession(
+      this._store,
+      {
+        play: () => this.play(),
+        pause: () => this.pause(),
+        seekTo: (time) => this.seekTo(time),
+        seekBy: (offset) => this.seekBy(offset),
+        stop: () => this.stop(),
+      },
+      sessionOpts,
+    )
+
+    this._cleanupFns.push(cleanup)
+  }
+
   private setupEvents(): void {
     // Attach option event listeners
     if (this._options.on) {
@@ -208,15 +236,48 @@ export class Player implements IPlayer {
   }
 
   private updateAttributes(state: PlayerState): void {
-    // Data attributes for styling
-    this._el.dataset.paused = String(state.paused)
-    this._el.dataset.playing = String(state.playing)
-    this._el.dataset.fullscreen = String(state.fullscreen)
-    this._el.dataset.pip = String(state.pictureInPicture)
-    this._el.dataset.muted = String(state.muted)
-    this._el.dataset.controlsVisible = String(state.controlsVisible)
-    this._el.dataset.loading = String(state.waiting || state.loadingState === 'loading')
-    this._el.dataset.ended = String(state.ended)
+    const el = this._el
+
+    // Playback state
+    el.dataset.paused = String(state.paused)
+    el.dataset.playing = String(state.playing)
+    el.dataset.ended = String(state.ended)
+    el.dataset.seeking = String(state.seeking)
+    el.dataset.waiting = String(state.waiting)
+    el.dataset.loop = String(state.loop)
+    el.dataset.autoplay = String(state.autoplay)
+
+    // Loading state
+    el.dataset.loading = String(state.waiting || state.loadingState === 'loading')
+    el.dataset.canPlay = String(state.canPlay)
+    el.dataset.loadingState = state.loadingState
+
+    // Volume
+    el.dataset.muted = String(state.muted)
+    el.dataset.volumeLevel = state.muted || state.volume === 0
+      ? 'silent'
+      : state.volume < 0.5
+        ? 'low'
+        : 'high'
+
+    // Fullscreen / PiP
+    el.dataset.fullscreen = String(state.fullscreen)
+    el.dataset.pip = String(state.pictureInPicture)
+
+    // UI
+    el.dataset.controlsVisible = String(state.controlsVisible)
+    el.dataset.userActive = String(state.userActive)
+
+    // Media type
+    el.dataset.mediaType = state.mediaType
+    el.dataset.streamType = state.streamType
+
+    // Captions
+    const hasActiveCaptions = state.textTracks.some((t) => t.mode === 'showing')
+    el.dataset.captions = String(hasActiveCaptions)
+
+    // Error
+    el.dataset.error = String(!!state.error)
   }
 
   // === Lifecycle ===
@@ -518,10 +579,16 @@ export class Player implements IPlayer {
   async enterFullscreen(): Promise<void> {
     if (this.state.fullscreenAvailability === 'unsupported') return
     await this._provider?.enterFullscreen()
+    if (this._options.fullscreenOrientationLock !== false) {
+      lockOrientation('landscape')
+    }
   }
 
   async exitFullscreen(): Promise<void> {
     await this._provider?.exitFullscreen()
+    if (this._options.fullscreenOrientationLock !== false) {
+      unlockOrientation()
+    }
   }
 
   async toggleFullscreen(): Promise<void> {

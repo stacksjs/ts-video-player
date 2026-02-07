@@ -377,6 +377,14 @@ export interface PlayerOptions {
   /** Vimeo player parameters */
   vimeoParams?: Record<string, string | number | boolean>
 
+  // === Media Session ===
+  /** Media Session API integration for lock screen / notification controls */
+  mediaSession?: boolean | MediaSessionConfig
+
+  // === Orientation ===
+  /** Lock orientation to landscape when entering fullscreen on mobile */
+  fullscreenOrientationLock?: boolean
+
   // === Events ===
   /** Event listeners */
   on?: Partial<PlayerEventMap>
@@ -384,6 +392,20 @@ export interface PlayerOptions {
   // === Storage ===
   /** Persist volume/muted state */
   storage?: boolean | StorageConfig
+}
+
+/**
+ * Media Session configuration
+ */
+export interface MediaSessionConfig {
+  /** Title to display on lock screen */
+  title?: string
+  /** Artist name */
+  artist?: string
+  /** Album name */
+  album?: string
+  /** Artwork images for lock screen */
+  artwork?: MediaImage[]
 }
 
 /**

@@ -148,10 +148,17 @@ export function createDefaultState(): PlayerState {
 
 /**
  * State store for the player
+ *
+ * Uses microtask-coalesced notifications: multiple rapid set() calls within
+ * the same microtask are batched into a single notification cycle. This prevents
+ * redundant re-renders when many state fields change in quick succession
+ * (e.g., timeupdate + progress + buffered all firing together).
  */
 export class StateStore {
   private state: PlayerState
   private listeners = new Map<keyof PlayerState | '*', Set<(state: PlayerState, key?: keyof PlayerState) => void>>()
+  private _pendingKeys: Set<keyof PlayerState> | null = null
+  private _flushScheduled = false
 
   constructor(initial?: Partial<PlayerState>) {
     this.state = { ...createDefaultState(), ...initial }
@@ -172,31 +179,24 @@ export class StateStore {
   }
 
   /**
-   * Set state values
+   * Set a single state value. Notifications are coalesced via microtask.
    */
   set<K extends keyof PlayerState>(key: K, value: PlayerState[K]): void {
     if (this.state[key] === value) return
 
     this.state = { ...this.state, [key]: value }
-    this.notify(key)
+    this.scheduleNotify(key)
   }
 
   /**
-   * Batch update multiple state values
+   * Batch update multiple state values. Notifications are coalesced via microtask.
    */
   batch(updates: Partial<PlayerState>): void {
-    let changed = false
-
     for (const [key, value] of Object.entries(updates)) {
       if (this.state[key as keyof PlayerState] !== value) {
         ;(this.state as any)[key] = value
-        changed = true
-        this.notifyKey(key as keyof PlayerState)
+        this.scheduleNotify(key as keyof PlayerState)
       }
-    }
-
-    if (changed) {
-      this.notifyAll()
     }
   }
 
@@ -233,12 +233,37 @@ export class StateStore {
    */
   reset(): void {
     this.state = createDefaultState()
+    this._pendingKeys = null
+    this._flushScheduled = false
     this.notifyAll()
   }
 
-  private notify(key: keyof PlayerState): void {
-    this.notifyKey(key)
-    this.notifyAll()
+  /**
+   * Force synchronous flush of pending notifications.
+   * Useful in tests or when immediate consistency is required.
+   */
+  flush(): void {
+    if (this._pendingKeys) {
+      const keys = this._pendingKeys
+      this._pendingKeys = null
+      this._flushScheduled = false
+      for (const key of keys) {
+        this.notifyKey(key)
+      }
+      this.notifyAll()
+    }
+  }
+
+  private scheduleNotify(key: keyof PlayerState): void {
+    if (!this._pendingKeys) {
+      this._pendingKeys = new Set()
+    }
+    this._pendingKeys.add(key)
+
+    if (!this._flushScheduled) {
+      this._flushScheduled = true
+      queueMicrotask(() => this.flush())
+    }
   }
 
   private notifyKey(key: keyof PlayerState): void {

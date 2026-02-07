@@ -112,12 +112,14 @@ describe('StateStore', () => {
     expect(store.get('paused')).toBe(true)
   })
 
-  test('set updates value and notifies', () => {
+  test('set updates value and notifies on flush', () => {
     const store = new StateStore()
     let notified = false
     store.subscribe('volume', () => { notified = true })
     store.set('volume', 0.7)
     expect(store.get('volume')).toBe(0.7)
+    // Notification is microtask-coalesced, use flush to trigger synchronously
+    store.flush()
     expect(notified).toBe(true)
   })
 
@@ -126,6 +128,7 @@ describe('StateStore', () => {
     let count = 0
     store.subscribe('volume', () => { count++ })
     store.set('volume', 1) // same as default
+    store.flush()
     expect(count).toBe(0)
   })
 
@@ -135,6 +138,7 @@ describe('StateStore', () => {
     store.subscribe('volume', () => keys.push('volume'))
     store.subscribe('muted', () => keys.push('muted'))
     store.batch({ volume: 0.3, muted: true })
+    store.flush()
     expect(store.get('volume')).toBe(0.3)
     expect(store.get('muted')).toBe(true)
     expect(keys).toContain('volume')
@@ -146,6 +150,7 @@ describe('StateStore', () => {
     let count = 0
     store.subscribe((state) => { count++ })
     store.set('volume', 0.5)
+    store.flush()
     expect(count).toBe(1)
   })
 
@@ -154,9 +159,11 @@ describe('StateStore', () => {
     let received = false
     store.subscribe('paused', () => { received = true })
     store.set('volume', 0.5) // different key
+    store.flush()
     // * listener would trigger, but specific key listener should not
     expect(received).toBe(false)
     store.set('paused', false)
+    store.flush()
     expect(received).toBe(true)
   })
 
@@ -165,9 +172,11 @@ describe('StateStore', () => {
     let count = 0
     const unsub = store.subscribe('volume', () => { count++ })
     store.set('volume', 0.5)
+    store.flush()
     expect(count).toBe(1)
     unsub()
     store.set('volume', 0.3)
+    store.flush()
     expect(count).toBe(1)
   })
 
@@ -175,9 +184,63 @@ describe('StateStore', () => {
     const store = new StateStore()
     store.set('volume', 0.2)
     store.set('muted', true)
+    store.flush()
     store.reset()
     expect(store.get('volume')).toBe(1)
     expect(store.get('muted')).toBe(false)
+  })
+
+  test('microtask coalescing batches multiple set calls', async () => {
+    const store = new StateStore()
+    let globalCount = 0
+    store.subscribe((state) => { globalCount++ })
+
+    // Multiple rapid set calls
+    store.set('volume', 0.5)
+    store.set('muted', true)
+    store.set('paused', false)
+
+    // Values are updated immediately
+    expect(store.get('volume')).toBe(0.5)
+    expect(store.get('muted')).toBe(true)
+    expect(store.get('paused')).toBe(false)
+
+    // But notifications haven't fired yet
+    expect(globalCount).toBe(0)
+
+    // Wait for microtask
+    await Promise.resolve()
+
+    // Only one global notification for all three changes
+    expect(globalCount).toBe(1)
+  })
+
+  test('flush triggers synchronous notification', () => {
+    const store = new StateStore()
+    let count = 0
+    store.subscribe((state) => { count++ })
+    store.set('volume', 0.5)
+    store.set('muted', true)
+    expect(count).toBe(0)
+    store.flush()
+    expect(count).toBe(1)
+  })
+
+  test('key-specific notifications fire for each changed key', () => {
+    const store = new StateStore()
+    let volumeCount = 0
+    let mutedCount = 0
+    store.subscribe('volume', () => { volumeCount++ })
+    store.subscribe('muted', () => { mutedCount++ })
+
+    store.set('volume', 0.5)
+    store.set('volume', 0.3) // second change to same key
+    store.set('muted', true)
+    store.flush()
+
+    // Key was in pending set, notified once
+    expect(volumeCount).toBe(1)
+    expect(mutedCount).toBe(1)
   })
 })
 

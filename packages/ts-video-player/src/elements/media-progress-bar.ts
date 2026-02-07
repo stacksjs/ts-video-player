@@ -1,7 +1,7 @@
 /**
  * ts-video-player <media-progress-bar> Custom Element
  *
- * Seek bar with buffered overlay, pointer/keyboard interaction.
+ * Seek bar with buffered overlay, time tooltip, pointer/keyboard interaction.
  *
  * @module elements/media-progress-bar
  */
@@ -44,10 +44,28 @@ export class MediaProgressBar extends HTMLElement {
             transition: transform 0.1s;
           }
           .container:hover .thumb { transform: translate(-50%, -50%) scale(1.2); }
+          .tooltip {
+            position: absolute; bottom: 100%; left: 0;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); color: #fff;
+            padding: 4px 8px; border-radius: 3px;
+            font-size: 12px; font-family: monospace;
+            white-space: nowrap; pointer-events: none;
+            opacity: 0; transition: opacity 0.15s;
+            margin-bottom: 8px;
+          }
+          .tooltip::after {
+            content: ''; position: absolute;
+            top: 100%; left: 50%; transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: rgba(0,0,0,0.85);
+          }
+          .container:hover .tooltip { opacity: 1; }
         </style>
         <div class="container" part="container" role="slider"
              aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
              aria-label="Seek" tabindex="0">
+          <div class="tooltip" part="tooltip">0:00</div>
           <div class="track" part="track">
             <div class="buffered" part="buffered"></div>
             <div class="fill" part="fill"></div>
@@ -74,6 +92,25 @@ export class MediaProgressBar extends HTMLElement {
     const fill = this.shadowRoot!.querySelector('.fill') as HTMLElement
     const thumb = this.shadowRoot!.querySelector('.thumb') as HTMLElement
     const buffered = this.shadowRoot!.querySelector('.buffered') as HTMLElement
+    const tooltip = this.shadowRoot!.querySelector('.tooltip') as HTMLElement
+
+    const updateTooltip = (e: PointerEvent) => {
+      const rect = track.getBoundingClientRect()
+      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+      const time = percent * (player.state.duration || 0)
+
+      tooltip.textContent = formatTime(time, player.state.duration)
+
+      // Position tooltip, clamping to container edges
+      const containerRect = container.getBoundingClientRect()
+      const tooltipWidth = tooltip.offsetWidth
+      const rawLeft = e.clientX - containerRect.left
+      const minLeft = tooltipWidth / 2
+      const maxLeft = containerRect.width - tooltipWidth / 2
+      const clampedLeft = Math.max(minLeft, Math.min(maxLeft, rawLeft))
+
+      tooltip.style.left = `${clampedLeft}px`
+    }
 
     const seekFromEvent = (e: PointerEvent) => {
       const rect = track.getBoundingClientRect()
@@ -89,6 +126,7 @@ export class MediaProgressBar extends HTMLElement {
     }
 
     const onPointerMove = (e: PointerEvent) => {
+      updateTooltip(e)
       if (!this._isDragging) return
       seekFromEvent(e)
     }

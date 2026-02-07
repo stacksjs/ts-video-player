@@ -2,11 +2,13 @@
  * ts-video-player <media-settings-menu> Custom Element
  *
  * Settings dropdown with quality, speed, captions, and audio track options.
+ * Uses collision-aware popover positioning.
  *
  * @module elements/media-settings-menu
  */
 
 import { resolvePlayer } from './utils'
+import { computePosition } from '../core/popover'
 
 const GEAR_ICON = 'M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z'
 
@@ -30,11 +32,11 @@ export class MediaSettingsMenu extends HTMLElement {
           }
           button.trigger:hover { opacity: 0.8; }
           .menu {
-            position: absolute; bottom: 100%; right: 0;
+            position: fixed; z-index: 9999;
             min-width: 160px; max-height: 250px; overflow-y: auto;
             background: rgba(28,28,28,0.95); border-radius: 4px;
             padding: 4px 0; opacity: 0; visibility: hidden;
-            transform: translateY(10px);
+            transform: translateY(4px);
             transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
           }
           :host([open]) .menu {
@@ -106,6 +108,7 @@ export class MediaSettingsMenu extends HTMLElement {
     this.shadowRoot!.querySelector('.trigger')!.setAttribute('aria-expanded', 'true')
     this.shadowRoot!.querySelector('.menu')!.setAttribute('aria-hidden', 'false')
     this.renderPanel()
+    this.positionMenu()
   }
 
   close(): void {
@@ -113,6 +116,25 @@ export class MediaSettingsMenu extends HTMLElement {
     this.removeAttribute('open')
     this.shadowRoot!.querySelector('.trigger')!.setAttribute('aria-expanded', 'false')
     this.shadowRoot!.querySelector('.menu')!.setAttribute('aria-hidden', 'true')
+  }
+
+  private positionMenu(): void {
+    const trigger = this.shadowRoot!.querySelector('.trigger') as HTMLElement
+    const menu = this.shadowRoot!.querySelector('.menu') as HTMLElement
+    if (!trigger || !menu) return
+
+    // Find the player container as boundary (for fullscreen)
+    const playerEl = this.closest('video-player, .ts-video-player') as HTMLElement | null
+
+    const result = computePosition(trigger, menu, {
+      placement: 'top-end',
+      offset: 4,
+      boundary: playerEl,
+      padding: 8,
+    })
+
+    menu.style.top = `${result.top}px`
+    menu.style.left = `${result.left}px`
   }
 
   private attach(): void {
@@ -138,6 +160,11 @@ export class MediaSettingsMenu extends HTMLElement {
       case 'speed': this.renderSpeed(menu, player); break
       case 'quality': this.renderQuality(menu, player); break
       case 'captions': this.renderCaptions(menu, player); break
+    }
+
+    // Re-position after content changes
+    if (this._isOpen) {
+      queueMicrotask(() => this.positionMenu())
     }
   }
 
