@@ -16,16 +16,18 @@ export const gestures: Feature = {
     if (options.gestures === false) return
 
     const cleanup = createGestureDetector(container, {
-      onDoubleTapLeft: () => {
+      onDoubleTap: (x) => {
+        // Double-tap left third: seek back, right third: seek forward
+        const rect = container.getBoundingClientRect()
+        const third = rect.width / 3
+        const relX = x - rect.left
         const media = ctx.getMediaElement()
-        if (media) media.currentTime = Math.max(0, media.currentTime - 10)
-      },
-      onDoubleTapRight: () => {
-        const media = ctx.getMediaElement()
-        if (media) media.currentTime = Math.min(media.duration, media.currentTime + 10)
-      },
-      onDoubleTapCenter: () => {
-        // Toggle fullscreen — handled by player
+        if (!media) return
+        if (relX < third) {
+          media.currentTime = Math.max(0, media.currentTime - 10)
+        } else if (relX > third * 2) {
+          media.currentTime = Math.min(media.duration, media.currentTime + 10)
+        }
       },
       onSwipeUp: () => {
         const media = ctx.getMediaElement()

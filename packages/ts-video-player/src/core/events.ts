@@ -6,18 +6,12 @@
  * @module core/events
  */
 
-import type { PlayerEventMap, ProviderEventMap, MediaError, TimeRange, PlayerState } from '../types'
-
-// =============================================================================
-// Event Emitter
-// =============================================================================
-
-type EventMap = PlayerEventMap | ProviderEventMap
+import type { ProviderEventMap, MediaError, TimeRange } from '../types'
 
 /**
  * Type-safe event emitter
  */
-export class EventEmitter<T extends Record<string, (...args: any[]) => void>> {
+export class EventEmitter<T extends { [K in keyof T]: (...args: any[]) => void }> {
   private listeners = new Map<keyof T, Set<T[keyof T]>>()
   private onceListeners = new Map<keyof T, Set<T[keyof T]>>()
 
@@ -314,7 +308,7 @@ export function createKeyboardHandler(
   actions: KeyboardActions,
   options: { seekStep?: number; volumeStep?: number; speedStep?: number } = {},
 ): (event: KeyboardEvent) => void {
-  const { seekStep = 5, volumeStep = 0.1, speedStep = 0.25 } = options
+  const { seekStep: _seekStep = 5, volumeStep: _volumeStep = 0.1, speedStep: _speedStep = 0.25 } = options
 
   return (event: KeyboardEvent) => {
     // Ignore if in input field

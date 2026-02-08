@@ -36,7 +36,7 @@ export abstract class BaseComponent implements UIComponent {
     // Override in subclass
   }
 
-  update(state: PlayerState): void {
+  update(_state: PlayerState): void {
     // Override in subclass
   }
 

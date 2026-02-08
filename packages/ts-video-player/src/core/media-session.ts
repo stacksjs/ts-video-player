@@ -6,7 +6,6 @@
  * @module core/media-session
  */
 
-import type { PlayerState } from '../types'
 import type { StateStore } from './state'
 
 export interface MediaSessionOptions {

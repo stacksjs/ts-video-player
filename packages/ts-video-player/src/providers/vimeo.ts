@@ -172,8 +172,6 @@ export class VimeoProvider extends BaseProvider {
   private timeUpdateInterval: ReturnType<typeof setInterval> | null = null
   private _qualities: VideoQuality[] = []
   private _duration = 0
-  private _paused = true
-
   get mediaElement(): HTMLIFrameElement | null {
     return this.iframe
   }
@@ -308,7 +306,6 @@ export class VimeoProvider extends BaseProvider {
 
     // Play
     this.player.on('play', () => {
-      this._paused = false
       this.events.emit('play')
       this.events.emit('playing')
       this.events.emit('statechange', { paused: false, playing: true })
@@ -316,7 +313,6 @@ export class VimeoProvider extends BaseProvider {
 
     // Pause
     this.player.on('pause', () => {
-      this._paused = true
       this.events.emit('pause')
       this.events.emit('statechange', { paused: true, playing: false })
     })
@@ -386,7 +382,7 @@ export class VimeoProvider extends BaseProvider {
 
     try {
       const qualities = await this.player.getQualities()
-      this._qualities = qualities.map((q, index) => {
+      this._qualities = qualities.map((q) => {
         // Parse resolution from label (e.g., "1080p", "720p")
         const match = q.label.match(/(\d+)p/)
         const height = match ? parseInt(match[1], 10) : 0

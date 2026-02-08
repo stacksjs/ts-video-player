@@ -6,7 +6,7 @@
  * @module core/state
  */
 
-import type { PlayerState, TimeRange } from '../types'
+import type { PlayerState } from '../types'
 
 // =============================================================================
 // Utilities
@@ -417,6 +417,7 @@ interface StoredState {
   muted: boolean
   playbackRate: number
   captions: boolean
+  quality: string
 }
 
 /**

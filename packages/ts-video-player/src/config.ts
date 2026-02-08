@@ -1,4 +1,7 @@
-import type { VideoConfig } from './types'
+interface VideoConfig {
+  verbose: boolean
+  [key: string]: unknown
+}
 import { loadConfig } from 'bunfig'
 
 export const defaultConfig: VideoConfig = {

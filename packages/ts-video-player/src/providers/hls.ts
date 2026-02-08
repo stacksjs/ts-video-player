@@ -15,7 +15,6 @@ import type {
   VideoQuality,
   AudioTrack,
   TextTrack,
-  TimeRange,
 } from '../types'
 import { BaseProvider } from './base'
 import { MediaEventsNormalizer, onFullscreenChange, onPiPChange } from '../core/events'
@@ -414,7 +413,7 @@ export class HLSProvider extends BaseProvider {
       width: level.width,
       height: level.height,
       bitrate: level.bitrate,
-      codec: level.codecSet || level.videoCodec || null,
+      codec: level.codecSet || level.videoCodec || undefined,
       selected: index === this.currentQualityIndex,
     }))
 

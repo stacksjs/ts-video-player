@@ -11,7 +11,7 @@ export const keyboard: Feature = {
   name: 'keyboard',
 
   setup(ctx: FeatureContext) {
-    const { store, container, options } = ctx
+    const { container, options } = ctx
 
     if (options.keyboard === false) return
 

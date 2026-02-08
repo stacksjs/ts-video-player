@@ -183,7 +183,7 @@ export interface TextTrackCue {
   text: string
   position?: 'auto' | number
   line?: 'auto' | number
-  align?: 'start' | 'center' | 'end'
+  align?: 'start' | 'center' | 'end' | 'left' | 'right'
 }
 
 /**

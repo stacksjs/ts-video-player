@@ -11,10 +11,8 @@ import type {
   Src,
   MediaSource,
   PlayerOptions,
-  VideoQuality,
   AudioTrack,
   TextTrack,
-  TimeRange,
 } from '../types'
 import { BaseProvider } from './base'
 import { MediaEventsNormalizer, onFullscreenChange, onPiPChange } from '../core/events'

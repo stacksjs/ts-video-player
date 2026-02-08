@@ -20,7 +20,7 @@ export function isOrientationLockSupported(): boolean {
   return (
     typeof screen !== 'undefined' &&
     'orientation' in screen &&
-    typeof (screen.orientation as ScreenOrientationAPI).lock === 'function'
+    typeof (screen.orientation as unknown as ScreenOrientationAPI).lock === 'function'
   )
 }
 
@@ -36,7 +36,7 @@ export function lockOrientation(type: OrientationType): void {
     any: 'any',
   }
 
-  ;(screen.orientation as ScreenOrientationAPI)
+  ;(screen.orientation as unknown as ScreenOrientationAPI)
     .lock(orientationMap[type])
     .catch(() => {
       // Orientation lock may fail if not in fullscreen or unsupported
@@ -50,7 +50,7 @@ export function unlockOrientation(): void {
   if (!isOrientationLockSupported()) return
 
   try {
-    ;(screen.orientation as ScreenOrientationAPI).unlock()
+    ;(screen.orientation as unknown as ScreenOrientationAPI).unlock()
   } catch {
     // Unlock may fail if lock was never acquired
   }

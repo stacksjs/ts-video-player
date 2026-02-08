@@ -9,7 +9,6 @@
 
 import type {
   VideoComponentProps,
-  VideoDirectiveOptions,
   VideoRenderResult,
   PlayerOptions,
   Src,
@@ -35,7 +34,7 @@ import { extractYouTubeId } from '../providers/youtube'
  */
 export async function renderVideoComponent(
   props: VideoComponentProps,
-  context: { isDev?: boolean } = {},
+  _context: { isDev?: boolean } = {},
 ): Promise<VideoRenderResult> {
   const {
     src,
@@ -251,16 +250,14 @@ function normalizeSrc(src: Src | Src[]): Src | Src[] {
 }
 
 function buildEmbedPlaceholder(
-  id: string,
+  _id: string,
   attrs: string[],
   poster: string | undefined,
   title: string | undefined,
-  provider: string,
-  src: Src | Src[],
+  _provider: string,
+  _src: Src | Src[],
 ): string {
   const posterStyle = poster ? `background-image: url('${escapeAttr(poster)}');` : ''
-  const firstSrc = Array.isArray(src) ? src[0] : src
-  const url = typeof firstSrc === 'string' ? firstSrc : (firstSrc as any).src || ''
 
   return `
 <div ${attrs.join(' ')}>
@@ -278,7 +275,7 @@ function buildEmbedPlaceholder(
 }
 
 function buildNativeVideoPlaceholder(
-  id: string,
+  _id: string,
   attrs: string[],
   poster: string | undefined,
   title: string | undefined,
@@ -343,7 +340,7 @@ function getMimeType(src: string): string {
   return types[ext || ''] || 'video/mp4'
 }
 
-function generateInitScript(id: string, lazy: boolean): string {
+function generateInitScript(id: string, _lazy: boolean): string {
   return `
 (function() {
   var container = document.getElementById('${id}');
@@ -410,7 +407,7 @@ function generateInitScript(id: string, lazy: boolean): string {
 `.trim()
 }
 
-function generatePlayerCSS(theme: string): string {
+function generatePlayerCSS(_theme: string): string {
   return `
 .ts-video-player {
   position: relative;

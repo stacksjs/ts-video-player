@@ -7,7 +7,7 @@
  */
 
 import { Player } from '../player'
-import type { PlayerOptions, PlayerState, PlayerEventMap } from '../types'
+import type { PlayerOptions, PlayerEventMap } from '../types'
 
 const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload'] as const
 

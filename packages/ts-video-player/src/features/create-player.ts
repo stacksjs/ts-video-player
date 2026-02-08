@@ -8,7 +8,7 @@
 
 import type { Feature, FeatureContext } from './types'
 import type { PlayerState } from '../types'
-import { StateStore, createDefaultState } from '../core/state'
+import { StateStore } from '../core/state'
 
 export interface ComposablePlayer {
   /** The container element */

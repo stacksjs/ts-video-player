@@ -138,7 +138,7 @@ export class Player implements IPlayer {
     })
 
     // Subscribe to state changes
-    const unsubscribe = this._store.subscribe((state, key) => {
+    const unsubscribe = this._store.subscribe((state) => {
       // Update DOM attributes
       this.updateAttributes(state)
     })
@@ -173,9 +173,9 @@ export class Player implements IPlayer {
     })
 
     const target = config.global ? document : this._el
-    target.addEventListener('keydown', handler)
+    target.addEventListener('keydown', handler as EventListener)
 
-    this._cleanupFns.push(() => target.removeEventListener('keydown', handler))
+    this._cleanupFns.push(() => target.removeEventListener('keydown', handler as EventListener))
   }
 
   private setupActivity(): void {
