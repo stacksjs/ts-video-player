@@ -5,7 +5,7 @@
     "": {
       "name": "ts-video-player",
       "devDependencies": {
-        "better-dx": "^0.2.3",
+        "better-dx": "^0.2.6",
         "bun-git-hooks": "^0.3.1",
       },
     },
