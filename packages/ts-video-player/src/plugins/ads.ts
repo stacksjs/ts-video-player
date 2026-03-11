@@ -418,11 +418,16 @@ export class AdsManager {
   private contentPaused = false
 
   // Event handlers
-  private onAdStart: ((ad: Ad) => void) | null = null
-  private onAdComplete: ((ad: Ad) => void) | null = null
-  private onAdSkip: ((ad: Ad) => void) | null = null
-  private onAdClick: ((ad: Ad) => void) | null = null
-  private onAdErrorCallback: ((error: string) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAdStart: ((_ad: Ad) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAdComplete: ((_ad: Ad) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAdSkip: ((_ad: Ad) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAdClick: ((_ad: Ad) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAdErrorCallback: ((_error: string) => void) | null = null
   private onAllAdsComplete: (() => void) | null = null
 
   constructor(config: AdConfig = {}) {

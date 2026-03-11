@@ -343,16 +343,16 @@ function getMimeType(src: string): string {
 function generateInitScript(id: string, _lazy: boolean): string {
   return `
 (function() {
-  var container = document.getElementById('${id}');
+  const container = document.getElementById('${id}');
   if (!container) return;
 
-  var config = JSON.parse(container.dataset.config || '{}');
-  var isLazy = container.hasAttribute('data-lazy');
+  const config = JSON.parse(container.dataset.config || '{}');
+  const isLazy = container.hasAttribute('data-lazy');
 
   function initPlayer() {
     if (typeof VideoPlayer === 'undefined') {
       // Load the player library
-      var script = document.createElement('script');
+      const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/ts-video-player@latest/dist/index.min.js';
       script.onload = function() { createPlayer(); };
       document.head.appendChild(script);
@@ -362,7 +362,7 @@ function generateInitScript(id: string, _lazy: boolean): string {
   }
 
   function createPlayer() {
-    var player = VideoPlayer.createPlayer(container, config.options || {});
+    const player = VideoPlayer.createPlayer(container, config.options || {});
     if (config.src) {
       player.setSrc(config.src);
     }
@@ -371,7 +371,7 @@ function generateInitScript(id: string, _lazy: boolean): string {
 
   if (isLazy) {
     // Use IntersectionObserver for lazy loading
-    var observer = new IntersectionObserver(function(entries) {
+    const observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           initPlayer();
@@ -390,12 +390,12 @@ function generateInitScript(id: string, _lazy: boolean): string {
   }
 
   // Handle play button click (for embed placeholders)
-  var playButton = container.querySelector('.ts-video-player__play-button');
+  const playButton = container.querySelector('.ts-video-player__play-button');
   if (playButton) {
     playButton.addEventListener('click', function() {
       initPlayer();
       // Wait for player to initialize then play
-      var checkPlayer = setInterval(function() {
+      const checkPlayer = setInterval(function() {
         if (container.__videoPlayer && container.__videoPlayer.ready) {
           container.__videoPlayer.play();
           clearInterval(checkPlayer);

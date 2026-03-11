@@ -356,7 +356,7 @@ export function createCaptionStyleManager(styles?: CaptionStyleOptions): Caption
 export class CaptionSettingsMenu {
   private container: HTMLElement
   private manager: CaptionStyleManager
-  private onChange: ((styles: CaptionStyleOptions) => void) | null = null
+  private onChange: ((_styles: CaptionStyleOptions) => void) | null = null
 
   constructor(manager: CaptionStyleManager) {
     this.manager = manager

@@ -382,7 +382,7 @@ export class ChaptersManager {
 export class ChapterMenu {
   private container: HTMLElement
   private chapters: Chapter[] = []
-  private onSelect: ((chapter: Chapter) => void) | null = null
+  private onSelect: ((_chapter: Chapter) => void) | null = null
 
   constructor() {
     this.container = document.createElement('div')

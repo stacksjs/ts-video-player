@@ -38,7 +38,8 @@ export function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boo
 // Reactive Signal System
 // =============================================================================
 
-type Listener<T> = (value: T, prev: T) => void
+// eslint-disable-next-line pickier/no-unused-vars
+type Listener<T> = (_value: T, _prev: T) => void
 type Unsubscribe = () => void
 
 /**
@@ -231,8 +232,10 @@ export class StateStore {
    * Subscribe to state changes
    */
   subscribe(
-    keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
-    listener?: (state: PlayerState, key?: keyof PlayerState) => void,
+    // eslint-disable-next-line pickier/no-unused-vars
+    keyOrListener: keyof PlayerState | '*' | ((_state: PlayerState, _key?: keyof PlayerState) => void),
+    // eslint-disable-next-line pickier/no-unused-vars
+    listener?: (_state: PlayerState, _key?: keyof PlayerState) => void,
   ): Unsubscribe {
     if (typeof keyOrListener === 'function') {
       // Subscribe to all changes

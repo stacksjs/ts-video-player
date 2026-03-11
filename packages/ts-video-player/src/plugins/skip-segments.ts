@@ -91,9 +91,12 @@ export class SkipSegmentsManager {
   private unsubscribers: Array<() => void> = []
 
   // Event handlers
-  private onSkip: ((segment: SkipSegment) => void) | null = null
-  private onSegmentEnter: ((segment: SkipSegment) => void) | null = null
-  private onSegmentExit: ((segment: SkipSegment) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onSkip: ((_segment: SkipSegment) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onSegmentEnter: ((_segment: SkipSegment) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onSegmentExit: ((_segment: SkipSegment) => void) | null = null
 
   constructor(config: SkipSegmentsConfig) {
     this.config = {

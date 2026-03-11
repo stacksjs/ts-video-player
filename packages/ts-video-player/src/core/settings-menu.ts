@@ -67,11 +67,11 @@ export class SettingsMenu {
   private visible = false
 
   // Event handlers
-  private onQualityChange: ((quality: VideoQuality | 'auto') => void) | null = null
-  private onSpeedChange: ((speed: number) => void) | null = null
-  private onTextTrackChange: ((track: TextTrack | null) => void) | null = null
-  private onAudioTrackChange: ((track: AudioTrack) => void) | null = null
-  private onBoostChange: ((boost: number) => void) | null = null
+  private onQualityChange: ((_quality: VideoQuality | 'auto') => void) | null = null
+  private onSpeedChange: ((_speed: number) => void) | null = null
+  private onTextTrackChange: ((_track: TextTrack | null) => void) | null = null
+  private onAudioTrackChange: ((_track: AudioTrack) => void) | null = null
+  private onBoostChange: ((_boost: number) => void) | null = null
 
   constructor(config: SettingsMenuConfig = {}) {
     this.config = {

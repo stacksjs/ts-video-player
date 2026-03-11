@@ -95,9 +95,11 @@ export class EndScreenManager {
   private unsubscribers: Array<() => void> = []
 
   // Event handlers
-  private onRecommendationClick: ((rec: EndScreenRecommendation) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onRecommendationClick: ((_rec: EndScreenRecommendation) => void) | null = null
   private onReplay: (() => void) | null = null
-  private onAutoplay: ((rec: EndScreenRecommendation) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
+  private onAutoplay: ((_rec: EndScreenRecommendation) => void) | null = null
   private onShow: (() => void) | null = null
   private onHide: (() => void) | null = null
 
