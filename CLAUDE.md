@@ -2,7 +2,7 @@
 
 ## About
 
-A modern, framework-agnostic video player with deep stx integration.
+A modern, framework-agnostic video player supporting HTML5, YouTube, Vimeo, HLS, and DASH providers with adaptive streaming and automatic quality switching. It features rich UI components, full keyboard navigation and accessibility, 7 built-in themes (Netflix, YouTube, Vimeo, etc.), captions/subtitles, chapter markers, and plugins for analytics, VAST/VPAID ads, skip segments, end screens, and watermarks. It includes native stx integration via the `@video` directive and provides a `createPlayer()` API with comprehensive event handling.
 
 ## Linting
 
