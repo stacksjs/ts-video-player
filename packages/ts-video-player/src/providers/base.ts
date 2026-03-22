@@ -38,7 +38,7 @@ export abstract class BaseProvider implements Provider {
 
   protected container: HTMLElement | null = null
   protected options: PlayerOptions = {}
-  protected events = new EventEmitter<ProviderEventMap>()
+  protected events: EventEmitter<ProviderEventMap> = new EventEmitter<ProviderEventMap>()
   protected _ready = false
 
   get mediaElement(): HTMLVideoElement | HTMLAudioElement | HTMLIFrameElement | null {

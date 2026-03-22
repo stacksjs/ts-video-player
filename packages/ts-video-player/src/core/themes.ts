@@ -393,14 +393,14 @@ export const vimeoTheme: Theme = {
   },
 }
 
-export const presetThemes = {
+export const presetThemes: Record<string, Theme> = {
   dark: darkTheme,
   light: lightTheme,
   minimal: minimalTheme,
   netflix: netflixTheme,
   youtube: youtubeTheme,
   vimeo: vimeoTheme,
-} as const
+}
 
 export type PresetThemeName = keyof typeof presetThemes
 

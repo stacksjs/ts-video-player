@@ -18,7 +18,7 @@ describe('EventEmitter', () => {
     let received: number | null = null
     emitter.on('foo', (v) => { received = v })
     emitter.emit('foo', 42)
-    expect(received).toBe(42)
+    expect(received as unknown as number).toBe(42)
   })
 
   test('emit with multiple args', () => {

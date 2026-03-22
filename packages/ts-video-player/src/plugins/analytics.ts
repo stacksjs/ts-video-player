@@ -649,7 +649,7 @@ export function createVideoAnalytics(config: VideoAnalyticsConfig): VideoAnalyti
 /**
  * Analytics plugin for Player
  */
-export function analyticsPlugin(config: Omit<VideoAnalyticsConfig, 'videoId'>) {
+export function analyticsPlugin(config: Omit<VideoAnalyticsConfig, 'videoId'>): { name: string, install: (player: Player, videoConfig: { videoId: string, videoTitle?: string }) => () => void } {
   return {
     name: 'analytics',
 

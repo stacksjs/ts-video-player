@@ -517,11 +517,11 @@ export function createSkipSegments(config: SkipSegmentsConfig): SkipSegmentsMana
 /**
  * Skip segments plugin for Player
  */
-export function skipSegmentsPlugin(config: SkipSegmentsConfig) {
+export function skipSegmentsPlugin(config: SkipSegmentsConfig): { name: string, install: (player: Player, container: HTMLElement) => () => void } {
   return {
     name: 'skipSegments',
 
-    install(player: Player, container: HTMLElement) {
+    install(player: Player, container: HTMLElement): () => void {
       const skipSegments = createSkipSegments(config)
       skipSegments.attach(player, container)
 

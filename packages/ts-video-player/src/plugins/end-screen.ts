@@ -773,7 +773,7 @@ export function createEndScreen(config?: EndScreenConfig): EndScreenManager {
 /**
  * End screen plugin for Player
  */
-export function endScreenPlugin(config: EndScreenConfig) {
+export function endScreenPlugin(config: EndScreenConfig): { name: string, install: (player: Player, container: HTMLElement) => () => void } {
   return {
     name: 'endScreen',
 

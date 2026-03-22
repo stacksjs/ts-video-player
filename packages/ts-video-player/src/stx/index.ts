@@ -158,7 +158,7 @@ export function parseVideoComponent(content: string): VideoComponentProps | null
  * @video(youtubeUrl, { lazy: true })
  * ```
  */
-export function createVideoDirective() {
+export function createVideoDirective(): { name: string, hasEndTag: boolean, description: string, transform: (content: string, params: Record<string, unknown>, context: Record<string, unknown>) => Promise<string> } {
   return {
     name: 'video',
     hasEndTag: false,
@@ -571,7 +571,7 @@ function resolveValue(value: string | undefined, context: Record<string, unknown
 // Exports
 // =============================================================================
 
-export const videoDirective = createVideoDirective()
+export const videoDirective: { name: string, hasEndTag: boolean, description: string, transform: (content: string, params: Record<string, unknown>, context: Record<string, unknown>) => Promise<string> } = createVideoDirective()
 
 /**
  * Register ts-video-player directives with stx

@@ -47,7 +47,7 @@ describe('createSignal', () => {
     let received: string | null = null
     ;(get as any).subscribe((val: string) => { received = val })
     set('b')
-    expect(received).toBe('b')
+    expect(received as unknown as string).toBe('b')
   })
 
   test('does not notify when value is same', () => {

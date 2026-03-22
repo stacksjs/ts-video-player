@@ -512,11 +512,11 @@ export function createWatermarkManager(): WatermarkManager {
 /**
  * Watermark plugin for Player
  */
-export function watermarkPlugin(watermarks: Array<{ id: string } & WatermarkConfig>) {
+export function watermarkPlugin(watermarks: Array<{ id: string } & WatermarkConfig>): { name: string, install: (player: Player, container: HTMLElement) => () => void } {
   return {
     name: 'watermark',
 
-    install(player: Player, container: HTMLElement) {
+    install(player: Player, container: HTMLElement): () => void {
       const manager = createWatermarkManager()
       manager.attach(player, container)
 

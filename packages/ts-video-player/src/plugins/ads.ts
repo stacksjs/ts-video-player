@@ -1024,7 +1024,7 @@ export function createAdsManager(config?: AdConfig): AdsManager {
 /**
  * Ads plugin for Player
  */
-export function adsPlugin(config: AdConfig) {
+export function adsPlugin(config: AdConfig): { name: string, install: (player: Player, container: HTMLElement) => () => void } {
   return {
     name: 'ads',
 
