@@ -951,6 +951,7 @@ export class AdsManager {
    */
   private log(...args: unknown[]): void {
     if (this.config.debug) {
+      // eslint-disable-next-line no-console
       console.log('[VideoAds]', ...args)
     }
   }

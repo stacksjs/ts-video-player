@@ -471,6 +471,7 @@ export interface KeyboardConfig {
   /** Volume step (0-1) */
   volumeStep?: number
   /** Custom key bindings */
+  // eslint-disable-next-line pickier/no-unused-vars
   bindings?: Record<string, string | ((player: Player) => void)>
 }
 
@@ -767,6 +768,7 @@ export interface Player {
 
   // State Subscription
   subscribe(
+    // eslint-disable-next-line pickier/no-unused-vars
     keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
     listener?: (state: PlayerState, key?: keyof PlayerState) => void,
   ): () => void

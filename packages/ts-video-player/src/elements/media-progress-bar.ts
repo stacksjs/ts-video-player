@@ -63,8 +63,8 @@ export class MediaProgressBar extends HTMLElement {
           .container:hover .tooltip { opacity: 1; }
         </style>
         <div class="container" part="container" role="slider"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-             aria-label="Seek" tabindex="0">
+          aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+          aria-label="Seek" tabindex="0">
           <div class="tooltip" part="tooltip">0:00</div>
           <div class="track" part="track">
             <div class="buffered" part="buffered"></div>

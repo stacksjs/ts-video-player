@@ -83,7 +83,9 @@ export class MediaSettingsMenu extends HTMLElement {
   }
 
   private _onTriggerClick: (() => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
   private _onDocClick: ((e: MouseEvent) => void) | null = null
+  // eslint-disable-next-line pickier/no-unused-vars
   private _onDocKeydown: ((e: KeyboardEvent) => void) | null = null
 
   disconnectedCallback(): void {

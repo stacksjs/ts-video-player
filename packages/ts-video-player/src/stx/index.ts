@@ -512,7 +512,7 @@ function splitArgs(str: string): string[] {
   let stringChar = ''
 
   for (const char of str) {
-    if ((char === '"' || char === "'") && !inString) {
+    if ((char === '"' || char === '\'') && !inString) {
       inString = true
       stringChar = char
     } else if (char === stringChar && inString) {
@@ -546,7 +546,7 @@ function resolveValue(value: string | undefined, context: Record<string, unknown
   const trimmed = value.trim()
 
   // Remove quotes
-  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith('\'') && trimmed.endsWith('\''))) {
     return trimmed.slice(1, -1)
   }
 

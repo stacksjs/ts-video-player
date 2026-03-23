@@ -42,8 +42,8 @@ export class MediaVolumeSlider extends HTMLElement {
           .container:hover .thumb { transform: translate(-50%, -50%) scale(1.2); }
         </style>
         <div class="container" part="container" role="slider"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"
-             aria-label="Volume" tabindex="0">
+          aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"
+          aria-label="Volume" tabindex="0">
           <div class="track" part="track">
             <div class="fill" part="fill"></div>
             <div class="thumb" part="thumb"></div>

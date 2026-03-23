@@ -34,5 +34,3 @@ features:
     icon: "⚡"
     details: "Native @video directive for seamless stx template integration."
 ---
-
-<Home />

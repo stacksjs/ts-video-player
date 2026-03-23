@@ -50,6 +50,7 @@ export class Player implements IPlayer {
       const el = document.querySelector(container) as HTMLElement
       if (!el) throw new Error(`Container element not found: ${container}`)
       this._el = el
+    // eslint-disable-next-line style/brace-style
     } else {
       this._el = container
     }
@@ -121,7 +122,8 @@ export class Player implements IPlayer {
     }
 
     // Store reference
-    ;(this._el as any).__videoPlayer = this
+    const _el = this._el as any
+    _el.__videoPlayer = this
   }
 
   private setupState(): void {
@@ -349,7 +351,10 @@ export class Player implements IPlayer {
     this._loadingSource = true
 
     const sources = Array.isArray(src) ? src : [src]
-    if (sources.length === 0) { this._loadingSource = false; return }
+    if (sources.length === 0) {
+      this._loadingSource = false
+      return
+    }
 
     // Update state
     this._store.batch({
@@ -390,10 +395,14 @@ export class Player implements IPlayer {
       try {
         this._provider = await loader.load(mediaContainer, this._options)
         if (this._destroyed || !this._loadingSource) {
-          this._provider.destroy(); this._provider = null; this._loadingSource = false; return
+          this._provider.destroy()
+          this._provider = null
+          this._loadingSource = false
+          return
         }
         this._events.emit('providerchange', this._provider)
         this.attachProviderEvents(this._provider)
+      // eslint-disable-next-line style/brace-style
       } catch (error) {
         this._loadingSource = false
         if (this._destroyed) return
@@ -405,17 +414,22 @@ export class Player implements IPlayer {
       }
     }
 
-    if (this._destroyed || !this._loadingSource) { this._loadingSource = false; return }
+    if (this._destroyed || !this._loadingSource) {
+      this._loadingSource = false
+      return
+    }
 
     // Load source
     try {
       await this._provider.load(firstSrc)
+    // eslint-disable-next-line style/brace-style
     } catch (error) {
       if (this._destroyed) return
       this._store.batch({
         loadingState: 'error',
         error: { code: 4, message: 'Failed to load source', details: error },
       })
+    // eslint-disable-next-line style/brace-style
     } finally {
       this._loadingSource = false
     }
@@ -497,6 +511,7 @@ export class Player implements IPlayer {
       this._events.emit('volumechange', volume, muted)
       if (muted) {
         this.announce('Muted')
+      // eslint-disable-next-line style/brace-style
       } else {
         this.announce(`Volume ${Math.round(volume * 100)}%`)
       }
@@ -578,6 +593,7 @@ export class Player implements IPlayer {
       this.play().catch(() => {
         // Play rejection is already handled and emitted as error by provider
       })
+    // eslint-disable-next-line style/brace-style
     } else {
       this.pause()
     }
@@ -649,6 +665,7 @@ export class Player implements IPlayer {
   async toggleFullscreen(): Promise<void> {
     if (this.state.fullscreen) {
       await this.exitFullscreen()
+    // eslint-disable-next-line style/brace-style
     } else {
       await this.enterFullscreen()
     }
@@ -672,6 +689,7 @@ export class Player implements IPlayer {
   async togglePiP(): Promise<void> {
     if (this.state.pictureInPicture) {
       await this.exitPiP()
+    // eslint-disable-next-line style/brace-style
     } else {
       await this.enterPiP()
     }
@@ -683,6 +701,7 @@ export class Player implements IPlayer {
     this._provider?.setQuality(quality)
     if (quality === 'auto') {
       this._store.set('autoQuality', true)
+    // eslint-disable-next-line style/brace-style
     } else {
       this._store.set('autoQuality', false)
     }
@@ -704,6 +723,7 @@ export class Player implements IPlayer {
 
     if (showing) {
       this.setTextTrack(showing.id, 'disabled')
+    // eslint-disable-next-line style/brace-style
     } else {
       const first = textTracks.find((t) => t.kind === 'subtitles' || t.kind === 'captions')
       if (first) {
@@ -729,6 +749,7 @@ export class Player implements IPlayer {
   // === State Subscription ===
 
   subscribe(
+    // eslint-disable-next-line pickier/no-unused-vars
     keyOrListener: keyof PlayerState | '*' | ((state: PlayerState, key?: keyof PlayerState) => void),
     listener?: (state: PlayerState, key?: keyof PlayerState) => void,
   ): () => void {
@@ -740,6 +761,7 @@ export class Player implements IPlayer {
 // Default Options
 // =============================================================================
 
+// eslint-disable-next-line pickier/no-unused-vars
 const defaultOptions: PlayerOptions = {
   autoplay: false,
   loop: false,

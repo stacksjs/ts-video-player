@@ -235,11 +235,11 @@ const options: PlayerOptions = {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `src` | `string \| Src` | - | Media source URL or object |
+| `src` | `string &#124; Src` | - | Media source URL or object |
 | `poster` | `string` | - | Poster image URL |
 | `title` | `string` | - | Video title for accessibility |
 | `autoplay` | `boolean` | `false` | Auto-start playback |
-| `controls` | `boolean \| ControlsConfig` | `true` | Show/configure controls |
+| `controls` | `boolean &#124; ControlsConfig` | `true` | Show/configure controls |
 | `loop` | `boolean` | `false` | Loop playback |
 | `muted` | `boolean` | `false` | Start muted |
 | `volume` | `number` | `1` | Initial volume (0-1) |
@@ -247,9 +247,9 @@ const options: PlayerOptions = {
 | `preload` | `PreloadStrategy` | `'metadata'` | Preload strategy |
 | `crossOrigin` | `CrossOrigin` | - | Cross-origin setting |
 | `textTracks` | `TextTrack[]` | `[]` | Subtitles/captions |
-| `keyboard` | `boolean \| KeyboardConfig` | `true` | Keyboard controls |
+| `keyboard` | `boolean &#124; KeyboardConfig` | `true` | Keyboard controls |
 | `storage` | `StorageConfig` | - | Persist preferences |
-| `theme` | `Theme \| string` | `defaultTheme` | Player theme |
+| `theme` | `Theme &#124; string` | `defaultTheme` | Player theme |
 | `i18n` | `I18nConfig` | - | Internationalization |
 
 ## Next Steps

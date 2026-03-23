@@ -5,6 +5,7 @@
 import { build } from 'bun'
 
 async function main() {
+  // eslint-disable-next-line no-console
   console.log('Building ts-video-player...')
 
   // Build ESM (main + sub-entries with code splitting)
@@ -71,6 +72,7 @@ async function main() {
   })
   await proc.exited
 
+  // eslint-disable-next-line no-console
   console.log('Build complete!')
 }
 

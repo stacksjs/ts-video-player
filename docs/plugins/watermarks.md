@@ -209,6 +209,7 @@ watermarkPlugin([
 ```
 
 Animation types:
+
 - `fade` - Fades in and out
 - `slide` - Slides left and right
 - `bounce` - Bounces up and down

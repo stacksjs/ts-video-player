@@ -14,8 +14,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     },
     "./elements": {
       "types": "./dist/elements/index.d.ts",
@@ -29,8 +28,7 @@
       "import": "./dist/cdn.min.js"
     },
     "./core": {
-      "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.js"
+      "types": "./dist/core/index.d.ts"
     },
     "./stx": {
       "types": "./dist/stx/index.d.ts",
