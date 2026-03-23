@@ -1,11 +1,8 @@
 import type { PickierConfig } from 'pickier'
 
 const config: PickierConfig = {
-  rules: {
-    'no-console': 'off',
-  },
-
   pluginRules: {
+    'no-console': 'off',
     // Disable rules that trigger false positives on CSS/HTML inside template strings
     'style/max-statements-per-line': 'off',
     'style/brace-style': 'off',
