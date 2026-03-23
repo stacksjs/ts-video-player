@@ -1,6 +1,6 @@
 import type { PickierConfig } from 'pickier'
 
-const config: PickierConfig = {
+const config: Partial<PickierConfig> = {
   pluginRules: {
     'no-console': 'off',
     // Disable rules that trigger false positives on CSS/HTML inside template strings
