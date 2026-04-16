@@ -9,7 +9,7 @@ set -e
 echo "Publishing all packages..."
 
 for dir in packages/*/ ; do
-  if [ -d "$dir" ]; then
+  if [[ -d "$dir" ]]; then
     package_name=$(basename "$dir")
     package_json="$dir/package.json"
 
@@ -25,7 +25,7 @@ for dir in packages/*/ ; do
     # Finally fall back to grep
     else
       private_check=$(grep -E '"private":\s*true' "$package_json" || echo "")
-      if [ -n "$private_check" ]; then
+      if [[ -n "$private_check" ]]; then
         is_private="true"
       else
         is_private="false"
@@ -34,7 +34,7 @@ for dir in packages/*/ ; do
 
     echo "Package $package_name private status: $is_private"
 
-    if [ "$is_private" = "true" ]; then
+    if [[ "$is_private" = "true" ]]; then
       echo "Skipping $package_name (private package)"
     else
       echo "Publishing $package_name..."
