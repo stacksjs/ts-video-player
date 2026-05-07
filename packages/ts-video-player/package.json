@@ -57,8 +57,8 @@
     "dev": "bun --watch src/index.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "bunx --bun pickier .",
+    "lint:fix": "bunx --bun pickier . --fix"
   },
   "devDependencies": {
     "@types/bun": "latest",
