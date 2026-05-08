@@ -32,7 +32,7 @@
     "analytics"
   ],
   "scripts": {
-    "build": "bun run --filter '*' build",
+    "build": "bun run --filter './packages/*' build",
     "dev": "bun run --filter ts-video-player dev",
     "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
     "test": "bun test",
@@ -56,10 +56,10 @@
   },
   "git-hooks": {
     "pre-commit": {
-      "staged-lint": {
+      "stagedLint": {
         "*.{js,ts,json,yaml,yml,md}": "bunx --bun pickier lint --fix"
       }
     },
-    "commit-msg": "bunx gitlint --edit .git/COMMIT_EDITMSG"
+    "commit-msg": "bunx --bun @stacksjs/gitlint --edit .git/COMMIT_EDITMSG"
   }
 }
