@@ -11,6 +11,7 @@ const PAUSE_ICON = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'
 
 export class MediaPlayButton extends HTMLElement {
   private _cleanup: (() => void) | null = null
+  private _onClick: (() => void) | null = null
 
   connectedCallback(): void {
     if (!this.shadowRoot) {
@@ -38,8 +39,11 @@ export class MediaPlayButton extends HTMLElement {
   }
 
   disconnectedCallback(): void {
+    const button = this.shadowRoot?.querySelector('button')
+    if (button && this._onClick) button.removeEventListener('click', this._onClick)
     this._cleanup?.()
     this._cleanup = null
+    this._onClick = null
   }
 
   private attach(): void {
@@ -47,7 +51,8 @@ export class MediaPlayButton extends HTMLElement {
     if (!player) return
 
     const btn = this.shadowRoot!.querySelector('button')!
-    btn.addEventListener('click', () => player.togglePlay())
+    this._onClick = () => player.togglePlay()
+    btn.addEventListener('click', this._onClick)
 
     const unsub = player.subscribe('paused', (state: any) => {
       const paused = state.paused

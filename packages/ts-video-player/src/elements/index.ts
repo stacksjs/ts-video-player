@@ -19,6 +19,8 @@ export { MediaPreviewTime } from './media-preview-time'
 export { MediaProgressBar } from './media-progress-bar'
 export { MediaVolumeSlider } from './media-volume-slider'
 export { MediaSettingsMenu } from './media-settings-menu'
+export { MediaSeekButton } from './media-seek-button'
+export { MediaPlaybackRateButton } from './media-playback-rate-button'
 export { formatTime, formatTimePhrase, toISODuration, resolvePlayer } from './utils'
 
 import { VideoPlayerElement } from './video-player'
@@ -34,6 +36,8 @@ import { MediaPreviewTime } from './media-preview-time'
 import { MediaProgressBar } from './media-progress-bar'
 import { MediaVolumeSlider } from './media-volume-slider'
 import { MediaSettingsMenu } from './media-settings-menu'
+import { MediaSeekButton } from './media-seek-button'
+import { MediaPlaybackRateButton } from './media-playback-rate-button'
 
 const elements = [
   ['video-player', VideoPlayerElement],
@@ -49,6 +53,8 @@ const elements = [
   ['media-progress-bar', MediaProgressBar],
   ['media-volume-slider', MediaVolumeSlider],
   ['media-settings-menu', MediaSettingsMenu],
+  ['media-seek-button', MediaSeekButton],
+  ['media-playback-rate-button', MediaPlaybackRateButton],
 ] as const
 
 /**

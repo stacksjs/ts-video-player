@@ -17,7 +17,7 @@ const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
 export class MediaSettingsMenu extends HTMLElement {
   private _cleanup: (() => void) | null = null
   private _isOpen = false
-  private _currentPanel: 'main' | 'speed' | 'quality' | 'captions' = 'main'
+  private _currentPanel: 'main' | 'speed' | 'quality' | 'captions' | 'audio' = 'main'
 
   connectedCallback(): void {
     if (!this.shadowRoot) {
@@ -162,6 +162,7 @@ export class MediaSettingsMenu extends HTMLElement {
       case 'speed': this.renderSpeed(menu, player); break
       case 'quality': this.renderQuality(menu, player); break
       case 'captions': this.renderCaptions(menu, player); break
+      case 'audio': this.renderAudio(menu, player); break
     }
 
     // Re-position after content changes
@@ -194,6 +195,14 @@ export class MediaSettingsMenu extends HTMLElement {
       const showing = state.textTracks.find((t: any) => t.mode === 'showing')
       this.addItem(menu, `Captions: ${showing?.label || 'Off'}`, () => {
         this._currentPanel = 'captions'
+        this.renderPanel()
+      })
+    }
+
+    if (state.audioTracks.length > 1) {
+      const selected = state.audioTracks.find((track: { selected: boolean }) => track.selected)
+      this.addItem(menu, `Audio: ${selected?.label || 'Default'}`, () => {
+        this._currentPanel = 'audio'
         this.renderPanel()
       })
     }
@@ -256,6 +265,20 @@ export class MediaSettingsMenu extends HTMLElement {
           this.close()
         }, track.mode === 'showing')
       }
+    }
+  }
+
+  private renderAudio(menu: Element, player: any): void {
+    this.addItem(menu, 'Back', () => {
+      this._currentPanel = 'main'
+      this.renderPanel()
+    }, false, true)
+
+    for (const track of player.state.audioTracks) {
+      this.addItem(menu, track.label || track.language || 'Audio track', () => {
+        player.setAudioTrack(track.id)
+        this.close()
+      }, track.selected)
     }
   }
 

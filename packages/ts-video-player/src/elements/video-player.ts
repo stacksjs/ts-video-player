@@ -9,11 +9,12 @@
 import { Player } from '../player'
 import type { PlayerOptions, PlayerEventMap } from '../types'
 
-const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload'] as const
+const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload', 'playsinline', 'crossorigin', 'controlslist', 'disable-picture-in-picture'] as const
 
 export class VideoPlayerElement extends HTMLElement {
   private _player: Player | null = null
   private _container: HTMLElement | null = null
+  private _disconnectId = 0
 
   static get observedAttributes(): string[] {
     return [...OBSERVED_ATTRS]
@@ -24,10 +25,11 @@ export class VideoPlayerElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this._disconnectId++
     if (this._player) return
 
     // Create shadow DOM
-    const shadow = this.attachShadow({ mode: 'open' })
+    const shadow = this.shadowRoot ?? this.attachShadow({ mode: 'open' })
 
     // Container
     this._container = document.createElement('div')
@@ -51,9 +53,15 @@ export class VideoPlayerElement extends HTMLElement {
   }
 
   disconnectedCallback(): void {
-    this._player?.destroy()
-    this._player = null
-    this._container = null
+    if (this.hasAttribute('keep-alive')) return
+    const disconnectId = ++this._disconnectId
+    queueMicrotask(() => {
+      if (this.isConnected || disconnectId !== this._disconnectId) return
+      this._player?.destroy()
+      this._player = null
+      this._container = null
+      this.shadowRoot?.replaceChildren()
+    })
   }
 
   attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
@@ -98,6 +106,14 @@ export class VideoPlayerElement extends HTMLElement {
     if (preload) options.preload = preload as PlayerOptions['preload']
 
     if (this.hasAttribute('controls')) options.controls = true
+    options.playsinline = this.getAttribute('playsinline') !== 'false'
+
+    const crossorigin = this.getAttribute('crossorigin')
+    if (crossorigin !== null) options.crossorigin = crossorigin as PlayerOptions['crossorigin']
+
+    const controlsList = this.getAttribute('controlslist')
+    if (controlsList) options.controlsList = controlsList.split(/\s+/) as PlayerOptions['controlsList']
+    options.disablePictureInPicture = this.hasAttribute('disable-picture-in-picture')
 
     return options
   }
