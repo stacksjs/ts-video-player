@@ -27,6 +27,7 @@ import {
 import { registerElements } from './elements'
 
 if (typeof window !== 'undefined') {
+  registerElements();
   (window as any).VideoPlayer = {
     createPlayer,
     Player,
