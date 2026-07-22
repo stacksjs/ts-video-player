@@ -21,6 +21,9 @@ export { MediaVolumeSlider } from './media-volume-slider'
 export { MediaSettingsMenu } from './media-settings-menu'
 export { MediaSeekButton } from './media-seek-button'
 export { MediaPlaybackRateButton } from './media-playback-rate-button'
+export { MediaAirplayButton } from './media-airplay-button'
+export { MediaLiveButton } from './media-live-button'
+export { MediaErrorDisplay } from './media-error-display'
 export { formatTime, formatTimePhrase, toISODuration, resolvePlayer } from './utils'
 
 import { VideoPlayerElement } from './video-player'
@@ -38,6 +41,9 @@ import { MediaVolumeSlider } from './media-volume-slider'
 import { MediaSettingsMenu } from './media-settings-menu'
 import { MediaSeekButton } from './media-seek-button'
 import { MediaPlaybackRateButton } from './media-playback-rate-button'
+import { MediaAirplayButton } from './media-airplay-button'
+import { MediaLiveButton } from './media-live-button'
+import { MediaErrorDisplay } from './media-error-display'
 
 const elements = [
   ['video-player', VideoPlayerElement],
@@ -55,6 +61,9 @@ const elements = [
   ['media-settings-menu', MediaSettingsMenu],
   ['media-seek-button', MediaSeekButton],
   ['media-playback-rate-button', MediaPlaybackRateButton],
+  ['media-airplay-button', MediaAirplayButton],
+  ['media-live-button', MediaLiveButton],
+  ['media-error-display', MediaErrorDisplay],
 ] as const
 
 /**
