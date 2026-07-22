@@ -3,7 +3,9 @@ import type { PlayerState } from '../types'
 
 const defaultRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
-export class MediaPlaybackRateButton extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaPlaybackRateButton extends HTMLElementBase {
   private cleanup: (() => void) | null = null
   private onClick: (() => void) | null = null
 

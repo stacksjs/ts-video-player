@@ -16,7 +16,9 @@
  * @module elements/media-time-group
  */
 
-export class MediaTimeGroup extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaTimeGroup extends HTMLElementBase {
   connectedCallback(): void {
     if (!this.shadowRoot) {
       const shadow = this.attachShadow({ mode: 'open' })

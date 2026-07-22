@@ -14,7 +14,9 @@ const GEAR_ICON = 'M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03
 
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
 
-export class MediaSettingsMenu extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaSettingsMenu extends HTMLElementBase {
   private _cleanup: (() => void) | null = null
   private _isOpen = false
   private _currentPanel: 'main' | 'speed' | 'quality' | 'captions' | 'audio' = 'main'

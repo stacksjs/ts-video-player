@@ -1,7 +1,9 @@
 import { resolvePlayer } from './utils'
 import type { PlayerState } from '../types'
 
-export class MediaSeekButton extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaSeekButton extends HTMLElementBase {
   private cleanup: (() => void) | null = null
   private onClick: (() => void) | null = null
 

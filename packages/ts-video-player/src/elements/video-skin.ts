@@ -16,7 +16,9 @@
 
 import { resolvePlayer } from './utils'
 
-export class VideoSkin extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class VideoSkin extends HTMLElementBase {
   private _cleanups: Array<() => void> = []
 
   connectedCallback(): void {

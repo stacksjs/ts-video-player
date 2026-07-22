@@ -7,7 +7,9 @@
  * @module elements/media-time-separator
  */
 
-export class MediaTimeSeparator extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaTimeSeparator extends HTMLElementBase {
   connectedCallback(): void {
     if (!this.shadowRoot) {
       const shadow = this.attachShadow({ mode: 'open' })

@@ -8,7 +8,9 @@
 
 import { resolvePlayer } from './utils'
 
-export class MediaVolumeSlider extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaVolumeSlider extends HTMLElementBase {
   private _cleanups: Array<() => void> = []
   private _isDragging = false
 

@@ -11,7 +11,9 @@ import type { PlayerOptions, PlayerEventMap } from '../types'
 
 const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload', 'playsinline', 'crossorigin', 'controlslist', 'disable-picture-in-picture'] as const
 
-export class VideoPlayerElement extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class VideoPlayerElement extends HTMLElementBase {
   private _player: Player | null = null
   private _container: HTMLElement | null = null
   private _disconnectId = 0

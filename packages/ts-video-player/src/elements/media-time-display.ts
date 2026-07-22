@@ -9,7 +9,9 @@
 
 import { resolvePlayer, formatTime, formatTimePhrase, toISODuration } from './utils'
 
-export class MediaTimeDisplay extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaTimeDisplay extends HTMLElementBase {
   private _cleanup: (() => void) | null = null
   private _showRemaining = false
 

@@ -8,7 +8,9 @@
 
 import { resolvePlayer, formatTime, formatTimePhrase } from './utils'
 
-export class MediaProgressBar extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaProgressBar extends HTMLElementBase {
   private _cleanups: Array<() => void> = []
   private _isDragging = false
 

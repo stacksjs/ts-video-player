@@ -9,7 +9,9 @@ import { resolvePlayer } from './utils'
 const PLAY_ICON = 'M8 5v14l11-7z'
 const PAUSE_ICON = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'
 
-export class MediaPlayButton extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaPlayButton extends HTMLElementBase {
   private _cleanup: (() => void) | null = null
   private _onClick: (() => void) | null = null
 

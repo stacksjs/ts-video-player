@@ -10,7 +10,9 @@
 
 import { resolvePlayer, formatTime } from './utils'
 
-export class MediaPreviewTime extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaPreviewTime extends HTMLElementBase {
   private _cleanups: Array<() => void> = []
 
   connectedCallback(): void {

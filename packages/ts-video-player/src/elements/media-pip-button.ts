@@ -8,7 +8,9 @@ import { resolvePlayer } from './utils'
 
 const PIP_ICON = 'M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z'
 
-export class MediaPipButton extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaPipButton extends HTMLElementBase {
   private _cleanup: (() => void) | null = null
 
   connectedCallback(): void {

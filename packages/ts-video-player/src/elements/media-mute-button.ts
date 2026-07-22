@@ -16,7 +16,9 @@ function getVolumeIcon(muted: boolean, volume: number): string {
   return ICON_HIGH
 }
 
-export class MediaMuteButton extends HTMLElement {
+import { HTMLElementBase } from './base'
+
+export class MediaMuteButton extends HTMLElementBase {
   private _cleanup: (() => void) | null = null
 
   connectedCallback(): void {
