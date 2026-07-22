@@ -29,6 +29,8 @@ export class MediaProgressBar extends HTMLElementBase {
             height: 4px; background: rgba(255,255,255,0.3);
             border-radius: 2px; transform: translateY(-50%);
           }
+          :host([waveform]) .track { height: 20px; overflow: hidden; background: rgba(255,255,255,0.16); }
+          .waveform { position: absolute; inset: 0; background-position: center; background-repeat: no-repeat; background-size: 100% 100%; opacity: 0.65; }
           .buffered {
             position: absolute; top: 0; left: 0;
             height: 100%; background: rgba(255,255,255,0.4);
@@ -69,6 +71,7 @@ export class MediaProgressBar extends HTMLElementBase {
           aria-label="Seek" tabindex="0">
           <div class="tooltip" part="tooltip">0:00</div>
           <div class="track" part="track">
+            <div class="waveform" part="waveform" aria-hidden="true"></div>
             <div class="buffered" part="buffered"></div>
             <div class="fill" part="fill"></div>
             <div class="thumb" part="thumb"></div>
@@ -95,6 +98,14 @@ export class MediaProgressBar extends HTMLElementBase {
     const thumb = this.shadowRoot!.querySelector('.thumb') as HTMLElement
     const buffered = this.shadowRoot!.querySelector('.buffered') as HTMLElement
     const tooltip = this.shadowRoot!.querySelector('.tooltip') as HTMLElement
+    const waveform = this.getAttribute('waveform')
+    if (waveform) {
+      const resolved = new URL(waveform, document.baseURI)
+      if (['http:', 'https:', 'blob:'].includes(resolved.protocol) || resolved.href.startsWith('data:image/')) {
+        const layer = this.shadowRoot!.querySelector('.waveform') as HTMLElement
+        layer.style.backgroundImage = `url(${JSON.stringify(resolved.href)})`
+      }
+    }
 
     const updateTooltip = (e: PointerEvent) => {
       const rect = track.getBoundingClientRect()
