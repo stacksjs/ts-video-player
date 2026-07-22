@@ -139,6 +139,7 @@ export class HTML5Provider extends BaseProvider {
 
     // Append to container
     this.container.appendChild(this.media)
+    for (const track of this.options.tracks ?? []) this.addTextTrack(track)
 
     // Setup event normalization
     this.eventsNormalizer = new MediaEventsNormalizer(this.media, this.events)

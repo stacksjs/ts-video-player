@@ -181,6 +181,14 @@ export interface TextTrack {
   cues: TextTrackCue[]
 }
 
+export interface TextTrackSource {
+  src: string
+  kind: TextTrack['kind']
+  label?: string
+  language?: string
+  default?: boolean
+}
+
 /**
  * Text track cue
  */
@@ -334,6 +342,8 @@ export interface PlayerOptions {
   poster?: string
   /** Video title for accessibility */
   title?: string
+  /** External captions, subtitles, chapters, and metadata tracks */
+  tracks?: TextTrackSource[]
 
   // === Playback ===
   /** Autoplay on load */

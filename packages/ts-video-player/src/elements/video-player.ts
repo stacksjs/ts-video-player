@@ -7,7 +7,7 @@
  */
 
 import { Player } from '../player'
-import type { DRMConfig, PlayerOptions, PlayerEventMap, Src } from '../types'
+import type { DRMConfig, PlayerOptions, PlayerEventMap, Src, TextTrackSource } from '../types'
 
 const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload', 'playsinline', 'crossorigin', 'controlslist', 'disable-picture-in-picture'] as const
 
@@ -90,12 +90,16 @@ export class VideoPlayerElement extends HTMLElementBase {
 
     const config = this.readSourceConfig()
     if (config.sources?.length) options.src = config.sources
+    if (config.tracks?.length) options.tracks = config.tracks
 
     const src = this.getAttribute('src')
     if (src && !options.src) options.src = config.drm ? { src, type: 'application/dash+xml', drm: config.drm } : src
 
     const poster = this.getAttribute('poster')
     if (poster) options.poster = poster
+
+    const title = this.getAttribute('title')
+    if (title) options.title = title
 
     if (this.hasAttribute('autoplay')) options.autoplay = true
     if (this.hasAttribute('loop')) options.loop = true
@@ -123,17 +127,21 @@ export class VideoPlayerElement extends HTMLElementBase {
     return options
   }
 
-  private readSourceConfig(): { sources?: Src[], drm?: DRMConfig } {
+  private readSourceConfig(): { sources?: Src[], drm?: DRMConfig, tracks?: TextTrackSource[] } {
     const script = this.querySelector('script[type="application/json"][data-media-config]')
     const value = this.getAttribute('data-media-config')?.trim() || script?.textContent?.trim()
     if (!value) return {}
     if (value.length > 65_536) throw new TypeError('Media player configuration is too large')
     try {
-      const parsed = JSON.parse(value) as { sources?: unknown, drm?: unknown }
+      const parsed = JSON.parse(value) as { sources?: unknown, drm?: unknown, tracks?: unknown }
       if (parsed.sources !== undefined && (!Array.isArray(parsed.sources) || parsed.sources.some(source => !source || typeof source !== 'object' || typeof (source as { src?: unknown }).src !== 'string'))) {
         throw new TypeError('Media player sources are invalid')
       }
-      return { sources: parsed.sources as Src[] | undefined, drm: parsed.drm as DRMConfig | undefined }
+      const trackKinds = new Set(['subtitles', 'captions', 'descriptions', 'chapters', 'metadata'])
+      if (parsed.tracks !== undefined && (!Array.isArray(parsed.tracks) || parsed.tracks.some(track => !track || typeof track !== 'object' || typeof (track as { src?: unknown }).src !== 'string' || !trackKinds.has(String((track as { kind?: unknown }).kind))))) {
+        throw new TypeError('Media player tracks are invalid')
+      }
+      return { sources: parsed.sources as Src[] | undefined, drm: parsed.drm as DRMConfig | undefined, tracks: parsed.tracks as TextTrackSource[] | undefined }
     }
     catch (error) {
       if (error instanceof TypeError) throw error
