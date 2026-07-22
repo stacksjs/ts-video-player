@@ -81,6 +81,12 @@ export interface HLSSource {
   config?: Record<string, unknown>
 }
 
+export interface DRMConfig {
+  widevine?: { url: string, headers?: Record<string, string> }
+  playready?: { url: string, headers?: Record<string, string> }
+  fairplay?: { url: string, certificateUrl: string, headers?: Record<string, string> }
+}
+
 /**
  * DASH source configuration
  */
@@ -89,6 +95,8 @@ export interface DASHSource {
   type: 'application/dash+xml'
   /** dash.js configuration overrides */
   config?: Record<string, unknown>
+  /** License endpoints for encrypted DASH content. */
+  drm?: DRMConfig
 }
 
 /**

@@ -7,7 +7,7 @@
  */
 
 import { Player } from '../player'
-import type { PlayerOptions, PlayerEventMap } from '../types'
+import type { DRMConfig, PlayerOptions, PlayerEventMap, Src } from '../types'
 
 const OBSERVED_ATTRS = ['src', 'poster', 'autoplay', 'loop', 'muted', 'controls', 'volume', 'playback-rate', 'preload', 'playsinline', 'crossorigin', 'controlslist', 'disable-picture-in-picture'] as const
 
@@ -88,8 +88,11 @@ export class VideoPlayerElement extends HTMLElementBase {
   private buildOptions(): PlayerOptions {
     const options: PlayerOptions = {}
 
+    const config = this.readSourceConfig()
+    if (config.sources?.length) options.src = config.sources
+
     const src = this.getAttribute('src')
-    if (src) options.src = src
+    if (src && !options.src) options.src = config.drm ? { src, type: 'application/dash+xml', drm: config.drm } : src
 
     const poster = this.getAttribute('poster')
     if (poster) options.poster = poster
@@ -118,6 +121,24 @@ export class VideoPlayerElement extends HTMLElementBase {
     options.disablePictureInPicture = this.hasAttribute('disable-picture-in-picture')
 
     return options
+  }
+
+  private readSourceConfig(): { sources?: Src[], drm?: DRMConfig } {
+    const script = this.querySelector('script[type="application/json"][data-media-config]')
+    const value = script?.textContent?.trim()
+    if (!value) return {}
+    if (value.length > 65_536) throw new TypeError('Media player configuration is too large')
+    try {
+      const parsed = JSON.parse(value) as { sources?: unknown, drm?: unknown }
+      if (parsed.sources !== undefined && (!Array.isArray(parsed.sources) || parsed.sources.some(source => !source || typeof source !== 'object' || typeof (source as { src?: unknown }).src !== 'string'))) {
+        throw new TypeError('Media player sources are invalid')
+      }
+      return { sources: parsed.sources as Src[] | undefined, drm: parsed.drm as DRMConfig | undefined }
+    }
+    catch (error) {
+      if (error instanceof TypeError) throw error
+      throw new TypeError('Media player configuration is invalid JSON')
+    }
   }
 
   private forwardEvents(): void {

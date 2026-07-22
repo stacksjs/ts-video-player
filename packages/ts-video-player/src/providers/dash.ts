@@ -14,6 +14,7 @@ import type {
   AudioTrack,
   TextTrack,
   PlayerOptions,
+  DRMConfig,
 } from '../types'
 
 // =============================================================================
@@ -25,25 +26,6 @@ export interface DASHSource {
   type: 'dash'
   /** DRM configuration */
   drm?: DRMConfig
-}
-
-export interface DRMConfig {
-  /** Widevine license URL */
-  widevine?: {
-    url: string
-    headers?: Record<string, string>
-  }
-  /** PlayReady license URL */
-  playready?: {
-    url: string
-    headers?: Record<string, string>
-  }
-  /** FairPlay license URL (Safari only) */
-  fairplay?: {
-    url: string
-    certificateUrl: string
-    headers?: Record<string, string>
-  }
 }
 
 export interface DASHProviderConfig {

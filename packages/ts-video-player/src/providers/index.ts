@@ -24,7 +24,8 @@ export { HLSProvider, hlsLoader, isHLSSource, isNativeHLSSupported } from './hls
 // DASH
 export { DASHProvider, dashLoader, isDASHSource } from './dash'
 
-export type { DASHSource, DRMConfig, DASHProviderConfig } from './dash'
+export type { DASHSource, DASHProviderConfig } from './dash'
+export type { DRMConfig } from '../types'
 
 // Re-export types
 export type { Provider, ProviderLoader, ProviderType } from '../types'
