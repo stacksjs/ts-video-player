@@ -20,7 +20,7 @@ import { StateStore, createStorageSync, selectBufferedAmount } from './core/stat
 import { EventEmitter, createKeyboardHandler, createActivityDetector, type KeyboardActions } from './core/events'
 import { createMediaSession, type MediaSessionOptions } from './core/media-session'
 import { lockOrientation, unlockOrientation } from './core/orientation'
-import { defaultLoaders, findLoader, detectMediaType } from './providers'
+import { defaultLoaders, findSourceCandidates } from './providers'
 
 // =============================================================================
 // Player Class
@@ -38,7 +38,7 @@ export class Player implements IPlayer {
   private _loaders: ProviderLoader[]
   private _cleanupFns: Array<() => void> = []
   private _destroyed = false
-  private _loadingSource = false
+  private _sourceLoadId = 0
   private _announcer: HTMLElement | null = null
 
   /**
@@ -100,8 +100,10 @@ export class Player implements IPlayer {
   private setupElement(): void {
     this._el.classList.add('ts-video-player')
     this._el.setAttribute('tabindex', '0')
-    this._el.setAttribute('role', 'application')
+    this._el.setAttribute('role', 'region')
+    this._el.setAttribute('aria-roledescription', 'video player')
     this._el.setAttribute('aria-label', this._options.title || 'Video player')
+    this._el.setAttribute('aria-keyshortcuts', 'Space K M F I C ArrowLeft ArrowRight J L ArrowUp ArrowDown Home End 0 1 2 3 4 5 6 7 8 9')
 
     // Create inner structure
     const mediaContainer = document.createElement('div')
@@ -133,6 +135,7 @@ export class Player implements IPlayer {
       muted: this._options.muted ?? false,
       loop: this._options.loop ?? false,
       autoplay: this._options.autoplay ?? false,
+      playsinline: this._options.playsinline ?? true,
       playbackRate: this._options.playbackRate ?? 1,
       poster: this._options.poster || '',
       title: this._options.title || '',
@@ -201,8 +204,14 @@ export class Player implements IPlayer {
     this._cleanupFns.push(cleanup)
 
     // Pointer over tracking
-    this._el.addEventListener('mouseenter', () => this._store.set('pointerOver', true))
-    this._el.addEventListener('mouseleave', () => this._store.set('pointerOver', false))
+    const onMouseEnter = () => this._store.set('pointerOver', true)
+    const onMouseLeave = () => this._store.set('pointerOver', false)
+    this._el.addEventListener('mouseenter', onMouseEnter)
+    this._el.addEventListener('mouseleave', onMouseLeave)
+    this._cleanupFns.push(
+      () => this._el.removeEventListener('mouseenter', onMouseEnter),
+      () => this._el.removeEventListener('mouseleave', onMouseLeave),
+    )
   }
 
   private setupStorage(): void {
@@ -269,6 +278,7 @@ export class Player implements IPlayer {
     el.dataset.loading = String(state.waiting || state.loadingState === 'loading')
     el.dataset.canPlay = String(state.canPlay)
     el.dataset.loadingState = state.loadingState
+    el.setAttribute('aria-busy', String(state.waiting || state.loadingState === 'loading'))
 
     // Volume
     el.dataset.muted = String(state.muted)
@@ -315,6 +325,7 @@ export class Player implements IPlayer {
   destroy(): void {
     if (this._destroyed) return
     this._destroyed = true
+    this._sourceLoadId++
 
     // Emit destroy event
     this._events.emit('destroy')
@@ -344,15 +355,10 @@ export class Player implements IPlayer {
   async setSrc(src: Src | Src[]): Promise<void> {
     if (this._destroyed) return
 
-    // Prevent concurrent source loading — abort previous if still in flight
-    if (this._loadingSource) {
-      this._loadingSource = false
-    }
-    this._loadingSource = true
-
+    // Invalidate any older asynchronous provider load.
+    const loadId = ++this._sourceLoadId
     const sources = Array.isArray(src) ? src : [src]
     if (sources.length === 0) {
-      this._loadingSource = false
       return
     }
 
@@ -366,11 +372,8 @@ export class Player implements IPlayer {
 
     this._events.emit('sourceschange', sources)
 
-    // Find loader for first source
-    const firstSrc = sources[0]
-    const loader = findLoader(firstSrc, this._loaders)
-
-    if (!loader) {
+    const candidates = findSourceCandidates(sources, this._loaders)
+    if (candidates.length === 0) {
       this._store.batch({
         loadingState: 'error',
         error: { code: 4, message: 'No compatible provider found for source' },
@@ -378,61 +381,70 @@ export class Player implements IPlayer {
       return
     }
 
-    // Detect media type
-    const mediaType = detectMediaType(firstSrc, this._loaders)
-    this._store.set('mediaType', mediaType)
+    let lastError: unknown
+    for (const candidate of candidates) {
+      if (this._destroyed || loadId !== this._sourceLoadId) return
+      const { loader } = candidate
 
-    // Destroy existing provider if different type
-    if (this._provider && this._provider.type !== loader.type) {
-      this._provider.destroy()
-      this._provider = null
-      this._events.emit('providerchange', null)
-    }
+      if (this._provider && this._provider.type !== loader.type) {
+        this._provider.destroy()
+        this._provider = null
+        this._events.emit('providerchange', null)
+      }
 
-    // Create or reuse provider
-    if (!this._provider) {
-      const mediaContainer = this._el.querySelector('.ts-video-player__container') as HTMLElement
-      try {
-        this._provider = await loader.load(mediaContainer, this._options)
-        if (this._destroyed || !this._loadingSource) {
-          this._provider.destroy()
-          this._provider = null
-          this._loadingSource = false
-          return
+      if (!this._provider) {
+        const mediaContainer = this._el.querySelector('.ts-video-player__container') as HTMLElement
+        try {
+          this._provider = await loader.load(mediaContainer, {
+            ...this._options,
+            mediaType: loader.mediaType(candidate.src),
+          })
+          if (this._destroyed || loadId !== this._sourceLoadId) {
+            this._provider.destroy()
+            this._provider = null
+            return
+          }
+          this._events.emit('providerchange', this._provider)
+          this.attachProviderEvents(this._provider)
         }
-        this._events.emit('providerchange', this._provider)
-        this.attachProviderEvents(this._provider)
-      // eslint-disable-next-line style/brace-style
-      } catch (error) {
-        this._loadingSource = false
-        if (this._destroyed) return
+        catch (error) {
+          lastError = error
+          this._provider = null
+          continue
+        }
+      }
+
+      try {
+        // Native media elements should receive all same-provider sources so
+        // the browser can choose by MIME and codec support.
+        const compatibleSources = loader.type === 'video'
+          ? candidates.filter(item => item.loader.type === loader.type).map(item => item.src)
+          : [candidate.src]
+        await this._provider.load(compatibleSources.length > 1 ? compatibleSources : candidate.src)
+        if (this._destroyed || loadId !== this._sourceLoadId) return
         this._store.batch({
-          loadingState: 'error',
-          error: { code: 5, message: 'Failed to load provider', details: error },
+          src: candidate.src,
+          currentSourceIndex: candidate.index,
+          mediaType: loader.mediaType(candidate.src),
+          providerType: loader.type,
         })
         return
       }
+      catch (error) {
+        lastError = error
+        if (this._provider) {
+          this._provider.destroy()
+          this._provider = null
+        }
+        this._events.emit('providerchange', null)
+      }
     }
 
-    if (this._destroyed || !this._loadingSource) {
-      this._loadingSource = false
-      return
-    }
-
-    // Load source
-    try {
-      await this._provider.load(firstSrc)
-    // eslint-disable-next-line style/brace-style
-    } catch (error) {
-      if (this._destroyed) return
-      this._store.batch({
-        loadingState: 'error',
-        error: { code: 4, message: 'Failed to load source', details: error },
-      })
-    // eslint-disable-next-line style/brace-style
-    } finally {
-      this._loadingSource = false
-    }
+    if (this._destroyed || loadId !== this._sourceLoadId) return
+    this._store.batch({
+      loadingState: 'error',
+      error: { code: 4, message: 'Failed to load all compatible sources', details: lastError },
+    })
   }
 
   getSrc(): Src | null {

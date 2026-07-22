@@ -344,6 +344,10 @@ export interface PlayerOptions {
   preload?: PreloadStrategy
   /** Crossorigin attribute */
   crossorigin?: CrossOrigin
+  /** Native media controls restrictions */
+  controlsList?: Array<'nodownload' | 'nofullscreen' | 'noremoteplayback'>
+  /** Disable native Picture-in-Picture */
+  disablePictureInPicture?: boolean
 
   // === Controls ===
   /** Show native controls */
@@ -512,7 +516,7 @@ export interface Provider {
 
   // === Loading ===
   /** Load a source */
-  load(src: Src): Promise<void>
+  load(src: Src | Src[]): Promise<void>
   /** Check if provider can play source */
   canPlay(src: Src): boolean
 
@@ -819,6 +823,12 @@ export interface VideoComponentProps {
   playsinline?: boolean
   /** Preload */
   preload?: PreloadStrategy
+  /** Cross-origin mode */
+  crossorigin?: CrossOrigin
+  /** Native media controls restrictions */
+  controlsList?: Array<'nodownload' | 'nofullscreen' | 'noremoteplayback'>
+  /** Disable native Picture-in-Picture */
+  disablePictureInPicture?: boolean
   /** Theme */
   theme?: 'default' | 'minimal' | 'modern' | string
 }

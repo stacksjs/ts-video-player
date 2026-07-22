@@ -53,6 +53,9 @@ export async function renderVideoComponent(
     controls = true,
     playsinline = true,
     preload = 'metadata',
+    crossorigin,
+    controlsList,
+    disablePictureInPicture = false,
     theme = 'default',
   } = props
 
@@ -71,6 +74,9 @@ export async function renderVideoComponent(
     poster,
     title,
     controls,
+    crossorigin,
+    controlsList,
+    disablePictureInPicture,
   }
 
   // Build container attributes
@@ -101,7 +107,11 @@ export async function renderVideoComponent(
     html = buildEmbedPlaceholder(id, attrs, poster, title, providerType, src)
   } else {
     // Native video with poster
-    html = buildNativeVideoPlaceholder(id, attrs, poster, title, lazy, preload, src)
+    html = buildNativeVideoPlaceholder(id, attrs, poster, title, lazy, preload, src, {
+      crossorigin,
+      controlsList,
+      disablePictureInPicture,
+    })
   }
 
   // Build initialization script
@@ -282,6 +292,7 @@ function buildNativeVideoPlaceholder(
   lazy: boolean,
   preload: string,
   src: Src | Src[],
+  options: Pick<VideoComponentProps, 'crossorigin' | 'controlsList' | 'disablePictureInPicture'>,
 ): string {
   const firstSrc = Array.isArray(src) ? src[0] : src
   const url = typeof firstSrc === 'string' ? firstSrc : (firstSrc as any).src || ''
@@ -301,6 +312,9 @@ function buildNativeVideoPlaceholder(
   }
 
   if (title) videoAttrs.push(`title="${escapeAttr(title)}"`)
+  if (options.crossorigin !== undefined) videoAttrs.push(`crossorigin="${escapeAttr(options.crossorigin)}"`)
+  if (options.controlsList?.length) videoAttrs.push(`controlslist="${escapeAttr(options.controlsList.join(' '))}"`)
+  if (options.disablePictureInPicture) videoAttrs.push('disablepictureinpicture')
 
   return `
 <div ${attrs.join(' ')}>
@@ -327,7 +341,8 @@ function buildSourceTags(src: Src | Src[]): string {
 }
 
 function getMimeType(src: string): string {
-  const ext = src.split('.').pop()?.toLowerCase()
+  const path = src.split(/[?#]/, 1)[0]
+  const ext = path.slice(path.lastIndexOf('.') + 1).toLowerCase()
   const types: Record<string, string> = {
     mp4: 'video/mp4',
     webm: 'video/webm',
@@ -336,6 +351,13 @@ function getMimeType(src: string): string {
     mov: 'video/quicktime',
     m3u8: 'application/x-mpegURL',
     mpd: 'application/dash+xml',
+    mp3: 'audio/mpeg',
+    wav: 'audio/wav',
+    flac: 'audio/flac',
+    m4a: 'audio/mp4',
+    aac: 'audio/aac',
+    oga: 'audio/ogg',
+    opus: 'audio/ogg; codecs=opus',
   }
   return types[ext || ''] || 'video/mp4'
 }

@@ -4,6 +4,7 @@ import { isHLSSource } from '../../src/providers/hls'
 import { isDASHSource } from '../../src/providers/dash'
 import { isYouTubeSource, extractYouTubeId } from '../../src/providers/youtube'
 import { isVimeoSource, extractVimeoId, extractVimeoHash } from '../../src/providers/vimeo'
+import { findSourceCandidates } from '../../src/providers'
 
 // =============================================================================
 // HTML5 Source Detection
@@ -34,6 +35,12 @@ describe('isHTML5Source', () => {
     expect(isHTML5Source('audio.flac')).toBe(true)
   })
 
+  test('detects signed URLs and modern audio extensions', () => {
+    expect(isHTML5Source('https://cdn.example.com/video.mp4?token=abc#t=10')).toBe(true)
+    expect(isHTML5Source('https://cdn.example.com/audio.opus?signature=abc')).toBe(true)
+    expect(isHTML5Source('https://cdn.example.com/audio.m4a')).toBe(true)
+  })
+
   test('rejects non-HTML5 URLs', () => {
     expect(isHTML5Source('https://youtube.com/watch?v=abc')).toBe(false)
     expect(isHTML5Source('video.m3u8')).toBe(false)
@@ -46,6 +53,18 @@ describe('isHTML5Source', () => {
 
   test('detects MediaSource with audio type', () => {
     expect(isHTML5Source({ src: 'test.mp3', type: 'audio/mpeg' })).toBe(true)
+  })
+})
+
+describe('findSourceCandidates', () => {
+  test('preserves playable fallback order and original indexes', () => {
+    const candidates = findSourceCandidates([
+      '/media/unknown.bin',
+      '/media/movie.webm',
+      '/media/movie.mp4',
+    ])
+    expect(candidates.map(candidate => candidate.index)).toEqual([1, 2])
+    expect(candidates.map(candidate => candidate.loader.name)).toEqual(['html5', 'html5'])
   })
 })
 

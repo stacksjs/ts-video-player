@@ -71,7 +71,7 @@ export abstract class BaseProvider implements Provider {
 
   // === Loading ===
 
-  abstract load(src: Src): Promise<void>
+  abstract load(src: Src | Src[]): Promise<void>
   abstract canPlay(src: Src): boolean
 
   // === Playback ===

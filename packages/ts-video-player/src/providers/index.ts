@@ -63,6 +63,22 @@ export function findLoader(src: Src, loaders: ProviderLoader[] = defaultLoaders)
   return null
 }
 
+export interface SourceCandidate {
+  src: Src
+  index: number
+  loader: ProviderLoader
+}
+
+/** Resolve every playable source without discarding ordered fallbacks. */
+export function findSourceCandidates(sources: readonly Src[], loaders: ProviderLoader[] = defaultLoaders): SourceCandidate[] {
+  const candidates: SourceCandidate[] = []
+  sources.forEach((src, index) => {
+    const loader = findLoader(src, loaders)
+    if (loader) candidates.push({ src, index, loader })
+  })
+  return candidates
+}
+
 /**
  * Detect media type from source
  */

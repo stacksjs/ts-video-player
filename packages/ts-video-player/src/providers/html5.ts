@@ -23,17 +23,21 @@ import { probeVolumeAvailability } from '../core/features'
  */
 export function isHTML5Source(src: Src): boolean {
   if (typeof src === 'string') {
-    const url = src.toLowerCase()
+    const extension = getExtension(src)
     // Check for supported extensions
     if (
-      url.endsWith('.mp4') ||
-      url.endsWith('.webm') ||
-      url.endsWith('.ogg') ||
-      url.endsWith('.ogv') ||
-      url.endsWith('.mov') ||
-      url.endsWith('.mp3') ||
-      url.endsWith('.wav') ||
-      url.endsWith('.flac')
+      extension === 'mp4' ||
+      extension === 'webm' ||
+      extension === 'ogg' ||
+      extension === 'ogv' ||
+      extension === 'mov' ||
+      extension === 'mp3' ||
+      extension === 'wav' ||
+      extension === 'flac' ||
+      extension === 'm4a' ||
+      extension === 'aac' ||
+      extension === 'oga' ||
+      extension === 'opus'
     ) {
       return true
     }
@@ -53,11 +57,16 @@ export function isHTML5Source(src: Src): boolean {
   return false
 }
 
+function getExtension(src: string): string {
+  const path = src.split(/[?#]/, 1)[0]
+  return path.slice(path.lastIndexOf('.') + 1).toLowerCase()
+}
+
 /**
  * Get MIME type for a source
  */
 function getMimeType(src: string): string {
-  const ext = src.split('.').pop()?.toLowerCase()
+  const ext = getExtension(src)
   const mimeTypes: Record<string, string> = {
     mp4: 'video/mp4',
     webm: 'video/webm',
@@ -67,6 +76,10 @@ function getMimeType(src: string): string {
     mp3: 'audio/mpeg',
     wav: 'audio/wav',
     flac: 'audio/flac',
+    m4a: 'audio/mp4',
+    aac: 'audio/aac',
+    oga: 'audio/ogg',
+    opus: 'audio/ogg; codecs=opus',
   }
   return mimeTypes[ext || ''] || 'video/mp4'
 }
@@ -111,6 +124,10 @@ export class HTML5Provider extends BaseProvider {
     }
     if (this.options.preload) this.media.preload = this.options.preload
     if (this.options.crossorigin) this.media.crossOrigin = this.options.crossorigin
+    if (this.options.controlsList?.length) this.media.setAttribute('controlslist', this.options.controlsList.join(' '))
+    if (!this.isAudio && this.options.disablePictureInPicture) {
+      (this.media as HTMLVideoElement).disablePictureInPicture = true
+    }
     if (this.options.poster && !this.isAudio) {
       (this.media as HTMLVideoElement).poster = this.options.poster
     }
@@ -432,8 +449,8 @@ export const html5Loader = {
 
   mediaType(src: Src): 'video' | 'audio' | 'unknown' {
     if (typeof src === 'string') {
-      const url = src.toLowerCase()
-      if (url.endsWith('.mp3') || url.endsWith('.wav') || url.endsWith('.flac')) {
+      const extension = getExtension(src)
+      if (['mp3', 'wav', 'flac', 'm4a', 'aac', 'oga', 'opus'].includes(extension)) {
         return 'audio'
       }
       return 'video'
