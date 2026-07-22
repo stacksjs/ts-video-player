@@ -125,7 +125,7 @@ export class VideoPlayerElement extends HTMLElementBase {
 
   private readSourceConfig(): { sources?: Src[], drm?: DRMConfig } {
     const script = this.querySelector('script[type="application/json"][data-media-config]')
-    const value = script?.textContent?.trim()
+    const value = this.getAttribute('data-media-config')?.trim() || script?.textContent?.trim()
     if (!value) return {}
     if (value.length > 65_536) throw new TypeError('Media player configuration is too large')
     try {
