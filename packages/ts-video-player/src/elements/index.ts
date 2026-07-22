@@ -24,6 +24,7 @@ export { MediaPlaybackRateButton } from './media-playback-rate-button'
 export { MediaAirplayButton } from './media-airplay-button'
 export { MediaLiveButton } from './media-live-button'
 export { MediaErrorDisplay } from './media-error-display'
+export { MediaRemotePlaybackButton } from './media-remote-playback-button'
 export { formatTime, formatTimePhrase, toISODuration, resolvePlayer } from './utils'
 
 import { VideoPlayerElement } from './video-player'
@@ -44,6 +45,7 @@ import { MediaPlaybackRateButton } from './media-playback-rate-button'
 import { MediaAirplayButton } from './media-airplay-button'
 import { MediaLiveButton } from './media-live-button'
 import { MediaErrorDisplay } from './media-error-display'
+import { MediaRemotePlaybackButton } from './media-remote-playback-button'
 
 const elements = [
   ['video-player', VideoPlayerElement],
@@ -64,6 +66,7 @@ const elements = [
   ['media-airplay-button', MediaAirplayButton],
   ['media-live-button', MediaLiveButton],
   ['media-error-display', MediaErrorDisplay],
+  ['media-remote-playback-button', MediaRemotePlaybackButton],
 ] as const
 
 /**
