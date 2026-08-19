@@ -19,7 +19,7 @@ async function main() {
     target: 'browser',
     format: 'esm',
     splitting: true,
-    sourcemap: 'external',
+    sourcemap: 'none',
     minify: false,
   })
 
@@ -30,7 +30,7 @@ async function main() {
     target: 'browser',
     format: 'esm',
     naming: '[name].min.[ext]',
-    sourcemap: 'external',
+    sourcemap: 'none',
     minify: true,
   })
 
@@ -40,7 +40,7 @@ async function main() {
     outdir: './dist/stx',
     target: 'browser',
     format: 'esm',
-    sourcemap: 'external',
+    sourcemap: 'none',
     minify: false,
   })
 
@@ -50,7 +50,7 @@ async function main() {
     outdir: './dist/ui',
     target: 'browser',
     format: 'esm',
-    sourcemap: 'external',
+    sourcemap: 'none',
     minify: false,
   })
 
@@ -60,7 +60,7 @@ async function main() {
     outdir: './dist/plugins',
     target: 'browser',
     format: 'esm',
-    sourcemap: 'external',
+    sourcemap: 'none',
     minify: false,
   })
 
