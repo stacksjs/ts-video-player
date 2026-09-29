@@ -1,5 +1,20 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.5...v0.1.6)
+
+## 🐛 Bug Fixes
+
+- **youtube**: keep YouTube's chrome out of view during playback ([0e393eb](https://github.com/stacksjs/ts-video-player/commit/0e393eb)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.6 ([ff491a0](https://github.com/stacksjs/ts-video-player/commit/ff491a0)) _(by Chris <chrisbreuer93@gmail.com>)_
+- run bun-git-hooks and @stacksjs/logsmith, not the unrelated npm 'git-hooks' and 'logsmith' ([cbf183b](https://github.com/stacksjs/ts-video-player/commit/cbf183b)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.4...v0.1.5)
 
 ## 🚀 Features
