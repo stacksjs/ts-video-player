@@ -1,5 +1,20 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.4...v0.1.5)
+
+## 🚀 Features
+
+- **player**: cover an embed with its poster until it plays ([00c6342](https://github.com/stacksjs/ts-video-player/commit/00c6342)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.5 ([16b3f77](https://github.com/stacksjs/ts-video-player/commit/16b3f77)) _(by Chris <chrisbreuer93@gmail.com>)_
+- release through @stacksjs/bumpx, not the unrelated npm 'bumpx' ([36174ec](https://github.com/stacksjs/ts-video-player/commit/36174ec)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.3...v0.1.4)
 
 ## 🐛 Bug Fixes
