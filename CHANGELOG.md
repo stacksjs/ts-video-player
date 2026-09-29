@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.3...v0.1.4)
+
+## 🐛 Bug Fixes
+
+- **embeds**: fill the player with the YouTube or Vimeo frame ([ebb1a09](https://github.com/stacksjs/ts-video-player/commit/ebb1a09)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.4 ([eccda6d](https://github.com/stacksjs/ts-video-player/commit/eccda6d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.2...v0.1.3)
 
 ## 🐛 Bug Fixes
