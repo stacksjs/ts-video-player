@@ -756,6 +756,8 @@ export interface Player {
   // Source
   setSrc(src: Src | Src[]): void
   getSrc(): Src | null
+  /** The image shown before playback, and on an embed's cover */
+  setPoster(url: string): void
 
   // Playback
   play(): Promise<void>

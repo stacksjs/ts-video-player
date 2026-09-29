@@ -73,6 +73,9 @@ export class VideoPlayerElement extends HTMLElementBase {
       case 'src':
         if (value) this._player.setSrc(value)
         break
+      case 'poster':
+        this._player.setPoster(value || '')
+        break
       case 'muted':
         this._player.setMuted(value !== null)
         break

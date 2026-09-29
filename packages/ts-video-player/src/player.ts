@@ -21,6 +21,7 @@ import { EventEmitter, createKeyboardHandler, createActivityDetector, type Keybo
 import { createMediaSession, type MediaSessionOptions } from './core/media-session'
 import { lockOrientation, unlockOrientation } from './core/orientation'
 import { defaultLoaders, findSourceCandidates } from './providers'
+import { embedCover } from './core/cover'
 
 // =============================================================================
 // Player Class
@@ -40,6 +41,9 @@ export class Player implements IPlayer {
   private _destroyed = false
   private _sourceLoadId = 0
   private _announcer: HTMLElement | null = null
+  private _cover: HTMLButtonElement | null = null
+  private _coverDismissed = false
+  private _coverTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
    * Create a new player instance
@@ -114,6 +118,8 @@ export class Player implements IPlayer {
     mediaContainer.style.cssText = 'position:relative;width:100%;height:100%'
     this._el.appendChild(mediaContainer)
 
+    this.setupCover()
+
     // Create ARIA live region for screen reader announcements
     if (this._options.announcements !== false) {
       const liveRegion = document.createElement('div')
@@ -130,6 +136,63 @@ export class Player implements IPlayer {
     // Store reference
     const _el = this._el as any
     _el.__videoPlayer = this
+  }
+
+  /**
+   * The poster over an embedded video until it plays.
+   *
+   * A YouTube or Vimeo embed draws its own chrome before playback: a title
+   * bar, a play button, "Watch on YouTube", and on iOS the system's controls
+   * for the embed's own video. None of it can be styled from outside the
+   * iframe, and it stacks under the player's controls. Until the first play,
+   * the player shows its poster and one play button over the embed instead;
+   * once the video plays the embed's chrome is gone and the cover lifts.
+   */
+  private setupCover(): void {
+    const cover = document.createElement('button')
+    cover.type = 'button'
+    cover.className = 'ts-video-player__cover'
+    cover.setAttribute('aria-label', `Play ${this._options.title || 'video'}`)
+    cover.hidden = true
+    cover.style.cssText = 'position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;background:#000 center/cover no-repeat;cursor:pointer;-webkit-tap-highlight-color:transparent'
+    const button = document.createElement('span')
+    button.setAttribute('aria-hidden', 'true')
+    button.style.cssText = 'display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.92);box-shadow:0 4px 18px rgba(0,0,0,0.35)'
+    const triangle = document.createElement('span')
+    triangle.style.cssText = 'width:22px;height:24px;margin-left:5px;background:#0f172a;clip-path:polygon(0 0,100% 50%,0 100%)'
+    button.appendChild(triangle)
+    cover.appendChild(button)
+    cover.addEventListener('click', (event) => {
+      event.stopPropagation()
+      void this.play().catch(() => {})
+      // Some browsers only let a tap inside the embed start it. If this one
+      // did not, get out of the way so the embed's own button can.
+      if (this._coverTimer) clearTimeout(this._coverTimer)
+      this._coverTimer = setTimeout(() => {
+        if (this.state.started) return
+        this._coverDismissed = true
+        this.updateCover(this.state)
+      }, 2000)
+    })
+    this._el.appendChild(cover)
+    this._cover = cover
+    this._cleanupFns.push(() => {
+      if (this._coverTimer) clearTimeout(this._coverTimer)
+      cover.remove()
+    })
+  }
+
+  private updateCover(state: PlayerState): void {
+    const cover = this._cover
+    if (!cover) return
+    const { show, image } = embedCover(state, this._coverDismissed)
+    if (show) {
+      const background = image ? `url("${image.replace(/["\\]/g, '')}")` : 'none'
+      if (cover.style.backgroundImage !== background) cover.style.backgroundImage = background
+    }
+    // `hidden` alone would not do it: the inline display wins over it.
+    cover.hidden = !show
+    cover.style.display = show ? 'flex' : 'none'
   }
 
   private setupState(): void {
@@ -150,6 +213,7 @@ export class Player implements IPlayer {
     const unsubscribe = this._store.subscribe((state) => {
       // Update DOM attributes
       this.updateAttributes(state)
+      this.updateCover(state)
     })
 
     this._cleanupFns.push(unsubscribe)
@@ -366,12 +430,14 @@ export class Player implements IPlayer {
       return
     }
 
-    // Update state
+    // Update state. A new source has not played yet, so its cover returns.
+    this._coverDismissed = false
     this._store.batch({
       sources,
       src: sources[0],
       loadingState: 'loading',
       error: null,
+      started: false,
     })
 
     this._events.emit('sourceschange', sources)
@@ -449,6 +515,11 @@ export class Player implements IPlayer {
       loadingState: 'error',
       error: { code: 4, message: 'Failed to load all compatible sources', details: lastError },
     })
+  }
+
+  /** The image shown before playback, and on an embed's cover. */
+  setPoster(url: string): void {
+    this._store.set('poster', url)
   }
 
   getSrc(): Src | null {
