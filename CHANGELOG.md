@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.2...v0.1.3)
+
+## 🐛 Bug Fixes
+
+- **youtube**: load inside <video-player>, wait for ready, embed nocookie ([0bed166](https://github.com/stacksjs/ts-video-player/commit/0bed166)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.3 ([3c21b36](https://github.com/stacksjs/ts-video-player/commit/3c21b36)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.1...v0.1.2)
 
 ## 🧹 Chores
