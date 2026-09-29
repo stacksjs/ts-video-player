@@ -145,6 +145,8 @@ declare global {
         elementId: string | HTMLElement,
         options: {
           videoId?: string
+          /** Where the iframe is served from, e.g. https://www.youtube-nocookie.com. */
+          host?: string
           width?: number | string
           height?: number | string
           playerVars?: Record<string, string | number>
@@ -184,6 +186,8 @@ export class YouTubeProvider extends BaseProvider {
   private player: YTPlayer | null = null
   private iframe: HTMLIFrameElement | null = null
   private pendingVideoId: string | null = null
+  /** YouTube's own ready event: the player's methods exist only after it. */
+  private playerReady = false
   private startTime?: number
   private endTime?: number
   private timeUpdateInterval: ReturnType<typeof setInterval> | null = null
@@ -227,11 +231,14 @@ export class YouTubeProvider extends BaseProvider {
       Object.assign(playerVars, this.options.youtubeParams)
     }
 
-    // Use privacy-enhanced mode
-    playerVars.host = 'https://www.youtube-nocookie.com'
 
-    // Create player
-    this.player = new window.YT!.Player(playerDiv.id, {
+    // Create player. The element, not its id: the API looks an id up with
+    // document.getElementById, which cannot see into the shadow root the
+    // <video-player> element renders into, so an id found nothing there.
+    this.player = new window.YT!.Player(playerDiv, {
+      // Privacy-enhanced mode. A top-level option: set among playerVars, the
+      // API ignored it and embedded from youtube.com.
+      host: 'https://www.youtube-nocookie.com',
       width: '100%',
       height: '100%',
       playerVars,
@@ -287,12 +294,15 @@ export class YouTubeProvider extends BaseProvider {
 
     this.player?.destroy()
     this.player = null
+    this.playerReady = false
     this.iframe = null
   }
 
   // === Event Handlers ===
 
   private onReady(): void {
+    this.playerReady = true
+
     // Start time update polling
     this.timeUpdateInterval = setInterval(() => {
       if (this.player && this.lastState === 1) {
@@ -383,7 +393,10 @@ export class YouTubeProvider extends BaseProvider {
     this.startTime = parsed.startTime
     this.endTime = parsed.endTime
 
-    if (!this.player || !this._ready) {
+    // `_ready` means setup finished, which is before YouTube has attached
+    // cueVideoById and friends to the player: calling one then threw, and the
+    // source was reported as unplayable. onReady loads the pending video.
+    if (!this.player || !this._ready || !this.playerReady) {
       this.pendingVideoId = parsed.videoId
       return
     }
