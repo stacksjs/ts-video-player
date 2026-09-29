@@ -108,6 +108,10 @@ export class Player implements IPlayer {
     // Create inner structure
     const mediaContainer = document.createElement('div')
     mediaContainer.className = 'ts-video-player__container'
+    // Sized here, not only in a stylesheet: inside <video-player>'s shadow
+    // root no page stylesheet reaches it, and an embed's iframe sizes itself
+    // from this box.
+    mediaContainer.style.cssText = 'position:relative;width:100%;height:100%'
     this._el.appendChild(mediaContainer)
 
     // Create ARIA live region for screen reader announcements

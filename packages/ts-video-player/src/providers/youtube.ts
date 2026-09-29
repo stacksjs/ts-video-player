@@ -254,6 +254,8 @@ export class YouTubeProvider extends BaseProvider {
     // Get iframe reference
     this.iframe = this.player.getIframe()
     this.iframe.className = 'ts-video-player__media'
+    // Filling the player, whatever size the provider's API gave the frame.
+    this.iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0'
   }
 
   private async loadYouTubeAPI(): Promise<void> {

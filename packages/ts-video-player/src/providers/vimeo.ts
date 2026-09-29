@@ -274,6 +274,8 @@ export class VimeoProvider extends BaseProvider {
     this.iframe = this.container_el.querySelector('iframe')
     if (this.iframe) {
       this.iframe.className = 'ts-video-player__media'
+      // Filling the player, whatever size the provider's API gave the frame.
+      this.iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0'
     }
 
     // Setup event listeners
