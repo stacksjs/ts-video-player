@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { embedCover } from '../../src/core/cover'
 
-const youtube = { providerType: 'youtube' as const, started: false, error: null, poster: '', src: 'https://www.youtube.com/watch?v=k_EhLGvM8TQ' }
+const youtube = { providerType: 'youtube' as const, started: false, ended: false, error: null, poster: '', src: 'https://www.youtube.com/watch?v=k_EhLGvM8TQ' }
 
 describe('embed cover', () => {
   it('covers a YouTube embed before it plays, with its thumbnail', () => {
@@ -14,6 +14,10 @@ describe('embed cover', () => {
 
   it('lifts once the video has played', () => {
     expect(embedCover({ ...youtube, started: true }, false).show).toBe(false)
+  })
+
+  it('comes back when the video ends, over YouTube\'s suggestions of other videos', () => {
+    expect(embedCover({ ...youtube, started: true, ended: true }, false).show).toBe(true)
   })
 
   it('stays out of the way when a tap on it could not start the embed', () => {

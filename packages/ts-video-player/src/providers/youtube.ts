@@ -254,8 +254,14 @@ export class YouTubeProvider extends BaseProvider {
     // Get iframe reference
     this.iframe = this.player.getIframe()
     this.iframe.className = 'ts-video-player__media'
-    // Filling the player, whatever size the provider's API gave the frame.
-    this.iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0'
+    // Three times the player's height, centred, and clipped by the player.
+    // YouTube letterboxes the video in the middle of its frame, so the video
+    // still fills the player, while the chrome it draws at the frame's edges
+    // during playback (the title bar and channel avatar at the top, the
+    // YouTube logo and "More videos" at the bottom) falls outside the clip.
+    // It cannot be styled from outside the iframe any other way.
+    this.iframe.style.cssText = 'position:absolute;left:0;top:-100%;width:100%;height:300%;border:0'
+    if (this.iframe.parentElement) this.iframe.parentElement.style.overflow = 'hidden'
   }
 
   private async loadYouTubeAPI(): Promise<void> {

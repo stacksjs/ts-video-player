@@ -18,18 +18,22 @@ export interface EmbedCover {
  * A YouTube or Vimeo embed draws its own chrome before playback (a title bar,
  * a play button, "Watch on YouTube", and on iOS the system's controls for the
  * embed's own video), none of which can be styled from outside the iframe.
- * Until the first play the player covers it with its poster instead: the one
- * the page gave it, or else YouTube's thumbnail for the video.
+ * Until the first play, and again once it ends (where YouTube shows other
+ * videos), the player covers it with its poster instead: the one the page
+ * gave it, or else YouTube's thumbnail for the video.
  *
  * `dismissed` is set when a tap on the cover did not start playback, so the
  * embed's own button is left reachable.
  */
 export function embedCover(
-  state: Pick<PlayerState, 'providerType' | 'started' | 'error' | 'poster' | 'src'>,
+  state: Pick<PlayerState, 'providerType' | 'started' | 'ended' | 'error' | 'poster' | 'src'>,
   dismissed: boolean,
 ): EmbedCover {
   const embed = state.providerType === 'youtube' || state.providerType === 'vimeo'
-  if (!embed || state.started || state.error || dismissed)
+  // Back over the embed when the video ends, where YouTube would otherwise
+  // fill the frame with suggestions of other videos.
+  const waiting = !state.started || state.ended
+  if (!embed || !waiting || state.error || dismissed)
     return { show: false, image: '' }
 
   if (state.poster)
