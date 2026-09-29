@@ -1,6 +1,6 @@
 {
   "name": "ts-video-player",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A modern, framework-agnostic video player with deep stx integration",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
@@ -8,9 +8,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": [
-    "./dist/cdn.min.js"
-  ],
+  "sideEffects": true,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

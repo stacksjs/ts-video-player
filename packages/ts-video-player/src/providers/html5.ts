@@ -65,7 +65,7 @@ function getExtension(src: string): string {
 /**
  * Get MIME type for a source
  */
-function getMimeType(src: string): string {
+export function getMimeType(src: string): string {
   const ext = getExtension(src)
   const mimeTypes: Record<string, string> = {
     mp4: 'video/mp4',

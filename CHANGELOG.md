@@ -1,5 +1,16 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.1...v0.1.2)
+
+## 🧹 Chores
+
+- release v0.1.2 ([548fd17](https://github.com/stacksjs/ts-video-player/commit/548fd17)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: move to TypeScript 7 ([b5510af](https://github.com/stacksjs/ts-video-player/commit/b5510af)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.0...v0.1.1)
 
 ## ⚡ Performance Improvements

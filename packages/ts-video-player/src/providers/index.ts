@@ -35,7 +35,7 @@ export type { Provider, ProviderLoader, ProviderType } from '../types'
 // =============================================================================
 
 import type { ProviderLoader, Src } from '../types'
-import { html5Loader } from './html5'
+import { getMimeType, html5Loader } from './html5'
 import { youtubeLoader } from './youtube'
 import { vimeoLoader } from './vimeo'
 import { hlsLoader } from './hls'
@@ -53,12 +53,45 @@ export const defaultLoaders: ProviderLoader[] = [
 ]
 
 /**
+ * The URL of a source object that says nothing about its kind: `{ src }`,
+ * perhaps with a quality or size, but no `type`. Only its URL can tell a
+ * YouTube link from an MP4, so that is what the loaders are asked about.
+ */
+function untypedUrl(src: Src): string | null {
+  if (!src || typeof src !== 'object' || typeof src.src !== 'string')
+    return null
+  return 'type' in src && src.type ? null : src.src
+}
+
+/** What a loader's source type is written as, for a source it matched by URL alone. */
+const TYPE_FOR_LOADER: Record<string, (url: string) => string> = {
+  youtube: () => 'youtube',
+  vimeo: () => 'vimeo',
+  hls: () => 'application/x-mpegurl',
+  dash: () => 'dash',
+  video: url => getMimeType(url),
+}
+
+function withType(src: Src, loader: ProviderLoader): Src {
+  const url = untypedUrl(src)
+  const type = url && TYPE_FOR_LOADER[loader.type]
+  return url && type ? { ...(src as object), type: type(url) } as Src : src
+}
+
+/**
  * Find the appropriate provider loader for a source
  */
 export function findLoader(src: Src, loaders: ProviderLoader[] = defaultLoaders): ProviderLoader | null {
   for (const loader of loaders) {
     if (loader.canPlay(src)) {
       return loader
+    }
+  }
+  const url = untypedUrl(src)
+  if (url) {
+    for (const loader of loaders) {
+      if (loader.canPlay(url))
+        return loader
     }
   }
   return null
@@ -75,7 +108,8 @@ export function findSourceCandidates(sources: readonly Src[], loaders: ProviderL
   const candidates: SourceCandidate[] = []
   sources.forEach((src, index) => {
     const loader = findLoader(src, loaders)
-    if (loader) candidates.push({ src, index, loader })
+    // Typed for the provider that claimed it, which reads `type` to know how.
+    if (loader) candidates.push({ src: withType(src, loader), index, loader })
   })
   return candidates
 }

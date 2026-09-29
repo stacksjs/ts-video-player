@@ -188,3 +188,41 @@ describe('extractVimeoHash', () => {
     expect(extractVimeoHash('https://vimeo.com/123456789')).toBeNull()
   })
 })
+
+// =============================================================================
+// Source objects without a type
+// =============================================================================
+
+describe('findSourceCandidates with untyped source objects', () => {
+  test('a { src } object is matched by its URL and typed for its provider', () => {
+    const cases: Array<[string, string, unknown]> = [
+      ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube', 'youtube'],
+      ['https://youtu.be/dQw4w9WgXcQ', 'youtube', 'youtube'],
+      ['https://vimeo.com/123456789', 'vimeo', 'vimeo'],
+      ['https://cdn.example.com/stream.m3u8', 'hls', 'application/x-mpegurl'],
+      ['https://cdn.example.com/manifest.mpd', 'dash', 'dash'],
+      ['https://cdn.example.com/clip.mp4', 'video', 'video/mp4'],
+      ['https://cdn.example.com/clip.mov?token=1', 'video', 'video/quicktime'],
+    ]
+    for (const [src, loader, type] of cases) {
+      const [candidate] = findSourceCandidates([{ src }])
+      expect(candidate?.loader.type as string).toBe(loader)
+      expect((candidate?.src as { type?: string }).type).toBe(type as string)
+    }
+  })
+
+  test('keeps the object\'s other fields', () => {
+    const [candidate] = findSourceCandidates([{ src: 'https://cdn.example.com/clip.mp4', quality: '720p' }])
+    expect(candidate?.src).toEqual({ src: 'https://cdn.example.com/clip.mp4', quality: '720p', type: 'video/mp4' })
+  })
+
+  test('an explicit type still decides', () => {
+    const [candidate] = findSourceCandidates([{ src: 'https://cdn.example.com/video', type: 'video/webm' }])
+    expect(candidate?.loader.type as string).toBe('video')
+    expect(candidate?.src).toEqual({ src: 'https://cdn.example.com/video', type: 'video/webm' })
+  })
+
+  test('an unplayable URL finds nothing', () => {
+    expect(findSourceCandidates([{ src: 'https://example.com/page' }])).toEqual([])
+  })
+})
