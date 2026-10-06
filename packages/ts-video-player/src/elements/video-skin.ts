@@ -36,6 +36,7 @@ export class VideoSkin extends HTMLElementBase {
             color: white;
             font-family: system-ui, -apple-system, sans-serif;
             font-size: 14px;
+            container-type: inline-size;
           }
 
           /* Click-to-play overlay */
@@ -63,6 +64,25 @@ export class VideoSkin extends HTMLElementBase {
             visibility: hidden;
           }
 
+          /* The time and the progress bar. One row with the buttons on a
+             wide player; a phone-width one gives the progress bar a row of
+             its own, where it would otherwise be squeezed to a dot between
+             the buttons. */
+          .center { display: contents; }
+          @container (max-width: 520px) {
+            .controls { flex-wrap: wrap; row-gap: 0; padding: 4px 10px 6px; }
+            .center { display: flex; order: -1; flex: 1 0 100%; align-items: center; gap: 10px; min-width: 0; font-size: 12px; }
+            /* Speed is in the settings menu too; one button fewer keeps the
+               rest on one row. */
+            ::slotted(media-playback-rate-button) { display: none; }
+          }
+
+          /* A touch screen sets the volume with its own buttons, and iOS
+             ignores a page's volume altogether: no slider there. */
+          @media (pointer: coarse) {
+            ::slotted(media-volume-slider) { display: none; }
+          }
+
           /* Spacer pushes right-aligned controls */
           .spacer {
             flex: 1;
@@ -78,7 +98,7 @@ export class VideoSkin extends HTMLElementBase {
         </div>
         <div class="controls" part="controls">
           <slot name="left"></slot>
-          <slot name="center"></slot>
+          <div class="center" part="center"><slot name="center"></slot></div>
           <div class="spacer"></div>
           <slot name="right"></slot>
           <slot></slot>

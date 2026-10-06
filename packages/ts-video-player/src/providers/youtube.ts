@@ -192,6 +192,12 @@ export class YouTubeProvider extends BaseProvider {
   private endTime?: number
   private timeUpdateInterval: ReturnType<typeof setInterval> | null = null
   private lastState = -1
+  /**
+   * A play asked for before YouTube's player could take it. Its methods only
+   * exist after its ready event, and the video may still be pending then, so
+   * the play waits for both and the video loads playing.
+   */
+  private pendingPlay = false
 
   get mediaElement(): HTMLIFrameElement | null {
     return this.iframe
@@ -303,6 +309,7 @@ export class YouTubeProvider extends BaseProvider {
     this.player?.destroy()
     this.player = null
     this.playerReady = false
+    this.pendingPlay = false
     this.iframe = null
   }
 
@@ -324,8 +331,13 @@ export class YouTubeProvider extends BaseProvider {
 
     // Load pending video if any
     if (this.pendingVideoId) {
-      this.loadVideo(this.pendingVideoId, this.startTime, this.endTime)
+      const videoId = this.pendingVideoId
       this.pendingVideoId = null
+      this.loadVideo(videoId, this.startTime, this.endTime)
+    }
+    else if (this.pendingPlay) {
+      this.pendingPlay = false
+      this.player?.playVideo()
     }
   }
 
@@ -340,6 +352,9 @@ export class YouTubeProvider extends BaseProvider {
         this.events.emit('loadstart')
         break
       case PlayerState.PLAYING:
+        // A video loaded playing never passes through CUED, where the
+        // duration is otherwise announced.
+        if (this.getDuration() > 0) this.events.emit('durationchange', this.getDuration())
         this.events.emit('play')
         this.events.emit('playing')
         this.events.emit('statechange', { paused: false, playing: true, waiting: false })
@@ -415,7 +430,8 @@ export class YouTubeProvider extends BaseProvider {
   private loadVideo(videoId: string, startTime?: number, endTime?: number): void {
     if (!this.player) return
 
-    if (this.options.autoplay) {
+    if (this.options.autoplay || this.pendingPlay) {
+      this.pendingPlay = false
       this.player.loadVideoById({
         videoId,
         startSeconds: startTime,
@@ -433,15 +449,21 @@ export class YouTubeProvider extends BaseProvider {
   // === Playback ===
 
   async play(): Promise<void> {
-    this.player?.playVideo()
+    if (!this.player || !this.playerReady || this.pendingVideoId) {
+      this.pendingPlay = true
+      return
+    }
+    this.player.playVideo()
   }
 
   pause(): void {
-    this.player?.pauseVideo()
+    this.pendingPlay = false
+    if (this.playerReady) this.player?.pauseVideo()
   }
 
   stop(): void {
-    this.player?.stopVideo()
+    this.pendingPlay = false
+    if (this.playerReady) this.player?.stopVideo()
   }
 
   // === Seeking ===

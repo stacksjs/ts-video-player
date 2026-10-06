@@ -44,6 +44,12 @@ export class Player implements IPlayer {
   private _cover: HTMLButtonElement | null = null
   private _coverDismissed = false
   private _coverTimer: ReturnType<typeof setTimeout> | null = null
+  /**
+   * A play asked for before there was a provider to ask: a tap on the cover
+   * while the source was still loading. Kept and honoured once the source has
+   * loaded, so one tap plays the video rather than one tap per loading step.
+   */
+  private _playRequested = false
 
   /**
    * Create a new player instance
@@ -159,20 +165,39 @@ export class Player implements IPlayer {
     button.setAttribute('aria-hidden', 'true')
     button.style.cssText = 'display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.92);box-shadow:0 4px 18px rgba(0,0,0,0.35)'
     const triangle = document.createElement('span')
+    triangle.className = 'ts-video-player__cover-play'
     triangle.style.cssText = 'width:22px;height:24px;margin-left:5px;background:#0f172a;clip-path:polygon(0 0,100% 50%,0 100%)'
     button.appendChild(triangle)
     cover.appendChild(button)
     cover.addEventListener('click', (event) => {
       event.stopPropagation()
+      // The embed can take a few seconds to load on a phone: the tap is
+      // answered at once, with the play button turning into a spinner.
+      if (!cover.dataset.loading) {
+        cover.dataset.loading = ''
+        triangle.style.display = 'none'
+        const ring = document.createElement('span')
+        ring.className = 'ts-video-player__cover-spinner'
+        ring.style.cssText = 'width:26px;height:26px;border-radius:50%;border:3px solid rgba(15,23,42,0.2);border-top-color:#0f172a'
+        button.appendChild(ring)
+        ring.animate?.([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 800, iterations: Infinity })
+      }
       void this.play().catch(() => {})
       // Some browsers only let a tap inside the embed start it. If this one
-      // did not, get out of the way so the embed's own button can.
+      // did not, get out of the way so the embed's own button can. Only once
+      // the embed is ready, though: before then nothing could have started,
+      // and lifting the cover early showed the embed half-loaded.
       if (this._coverTimer) clearTimeout(this._coverTimer)
-      this._coverTimer = setTimeout(() => {
-        if (this.state.started) return
-        this._coverDismissed = true
-        this.updateCover(this.state)
-      }, 2000)
+      let waits = 0
+      const settle = () => {
+        this._coverTimer = setTimeout(() => {
+          if (this.state.started) return
+          if (!this.state.canPlay && ++waits < 10) return settle()
+          this._coverDismissed = true
+          this.updateCover(this.state)
+        }, 2000)
+      }
+      settle()
     })
     this._el.appendChild(cover)
     this._cover = cover
@@ -189,6 +214,13 @@ export class Player implements IPlayer {
     if (show) {
       const background = image ? `url("${image.replace(/["\\]/g, '')}")` : 'none'
       if (cover.style.backgroundImage !== background) cover.style.backgroundImage = background
+    }
+    // Back to a play button once it is no longer waiting on a tap's play.
+    if (!show && cover.dataset.loading !== undefined) {
+      delete cover.dataset.loading
+      cover.querySelector('.ts-video-player__cover-spinner')?.remove()
+      const triangle = cover.querySelector<HTMLElement>('.ts-video-player__cover-play')
+      if (triangle) triangle.style.display = ''
     }
     // `hidden` alone would not do it: the inline display wins over it.
     cover.hidden = !show
@@ -432,6 +464,7 @@ export class Player implements IPlayer {
 
     // Update state. A new source has not played yet, so its cover returns.
     this._coverDismissed = false
+    this._playRequested = false
     this._store.batch({
       sources,
       src: sources[0],
@@ -498,6 +531,10 @@ export class Player implements IPlayer {
           mediaType: loader.mediaType(candidate.src),
           providerType: loader.type,
         })
+        if (this._playRequested) {
+          this._playRequested = false
+          void this._provider.play().catch(() => {})
+        }
         return
       }
       catch (error) {
@@ -667,11 +704,15 @@ export class Player implements IPlayer {
   // === Playback ===
 
   async play(): Promise<void> {
-    if (!this._provider) return
+    if (!this._provider) {
+      this._playRequested = true
+      return
+    }
     await this._provider.play()
   }
 
   pause(): void {
+    this._playRequested = false
     this._provider?.pause()
   }
 
