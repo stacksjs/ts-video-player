@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.6...v0.1.7)
+
+## 🐛 Bug Fixes
+
+- **youtube**: one tap plays, even before YouTube's player is ready ([dbd1699](https://github.com/stacksjs/ts-video-player/commit/dbd1699)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.7 ([83ddf30](https://github.com/stacksjs/ts-video-player/commit/83ddf30)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.5...v0.1.6)
 
 ## 🐛 Bug Fixes
