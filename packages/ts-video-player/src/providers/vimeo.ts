@@ -114,6 +114,7 @@ interface VimeoPlayer {
   pause(): Promise<void>
   unload(): Promise<void>
   destroy(): Promise<void>
+  loadVideo(id: number | string | { id: number, h?: string }): Promise<number>
   getCurrentTime(): Promise<number>
   setCurrentTime(seconds: number): Promise<number>
   getDuration(): Promise<number>
@@ -240,10 +241,14 @@ export class VimeoProvider extends BaseProvider {
       return
     }
 
-    // Destroy existing player
+    // A player already here loads the next video in place. Destroying it and
+    // making a new one on the same element never became ready again: the SDK
+    // keeps its player per element, so a second video (or the same one
+    // chosen again) stayed "loading" for good.
     if (this.player) {
-      await this.player.destroy()
-      this.player = null
+      await this.player.loadVideo(parseInt(parsed.videoId, 10))
+      await this.announceLoaded()
+      return
     }
 
     // Build player options
@@ -280,6 +285,13 @@ export class VimeoProvider extends BaseProvider {
 
     // Setup event listeners
     this.attachVimeoEvents()
+
+    await this.announceLoaded()
+  }
+
+  /** What a loaded video tells the player: ready, its length, qualities and shape. */
+  private async announceLoaded(): Promise<void> {
+    if (!this.player) return
 
     // Emit ready
     this.events.emit('loadedmetadata')

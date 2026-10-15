@@ -22,6 +22,7 @@ import { createMediaSession, type MediaSessionOptions } from './core/media-sessi
 import { lockOrientation, unlockOrientation } from './core/orientation'
 import { defaultLoaders, findSourceCandidates } from './providers'
 import { embedCover } from './core/cover'
+import { label } from './elements/utils'
 
 // =============================================================================
 // Player Class
@@ -111,8 +112,8 @@ export class Player implements IPlayer {
     this._el.classList.add('ts-video-player')
     this._el.setAttribute('tabindex', '0')
     this._el.setAttribute('role', 'region')
-    this._el.setAttribute('aria-roledescription', 'video player')
-    this._el.setAttribute('aria-label', this._options.title || 'Video player')
+    this._el.setAttribute('aria-roledescription', label(this._el, 'videoRole'))
+    this._el.setAttribute('aria-label', this._options.title || label(this._el, 'videoPlayer'))
     this._el.setAttribute('aria-keyshortcuts', 'Space K M F I C ArrowLeft ArrowRight J L ArrowUp ArrowDown Home End 0 1 2 3 4 5 6 7 8 9')
 
     // Create inner structure
@@ -158,7 +159,7 @@ export class Player implements IPlayer {
     const cover = document.createElement('button')
     cover.type = 'button'
     cover.className = 'ts-video-player__cover'
-    cover.setAttribute('aria-label', `Play ${this._options.title || 'video'}`)
+    cover.setAttribute('aria-label', this._options.title ? label(this._el, 'playTitle', { title: this._options.title }) : label(this._el, 'play'))
     cover.hidden = true
     cover.style.cssText = 'position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;background:#000 center/cover no-repeat;cursor:pointer;-webkit-tap-highlight-color:transparent'
     const button = document.createElement('span')
@@ -463,8 +464,11 @@ export class Player implements IPlayer {
     }
 
     // Update state. A new source has not played yet, so its cover returns.
+    // With autoplay it starts once loaded: a player that follows a chosen
+    // video (`src` set again on <video-player>) plays each one it is given,
+    // not only the first.
     this._coverDismissed = false
-    this._playRequested = false
+    this._playRequested = !!this._options.autoplay
     this._store.batch({
       sources,
       src: sources[0],
@@ -533,7 +537,7 @@ export class Player implements IPlayer {
         })
         if (this._playRequested) {
           this._playRequested = false
-          void this._provider.play().catch(() => {})
+          void this.startRequestedPlay(this._provider)
         }
         return
       }
@@ -591,13 +595,13 @@ export class Player implements IPlayer {
     provider.on('play', () => {
       this._store.batch({ paused: false, ended: false })
       this._events.emit('play')
-      this.announce('Playing')
+      this.announce(label(this._el, 'playing'))
     })
 
     provider.on('pause', () => {
       this._store.set('paused', true)
       this._events.emit('pause')
-      this.announce('Paused')
+      this.announce(label(this._el, 'paused'))
     })
 
     provider.on('playing', () => {
@@ -634,10 +638,10 @@ export class Player implements IPlayer {
       this._store.batch({ volume, muted })
       this._events.emit('volumechange', volume, muted)
       if (muted) {
-        this.announce('Muted')
+        this.announce(label(this._el, 'muted'))
       // eslint-disable-next-line style/brace-style
       } else {
-        this.announce(`Volume ${Math.round(volume * 100)}%`)
+        this.announce(label(this._el, 'volumeLevel', { percent: Math.round(volume * 100) }))
       }
     })
 
@@ -657,7 +661,7 @@ export class Player implements IPlayer {
     provider.on('ended', () => {
       this._store.batch({ ended: true, playing: false, playbackState: 'ended' })
       this._events.emit('ended')
-      this.announce('Playback ended')
+      this.announce(label(this._el, 'ended'))
 
       // Handle loop
       if (this.state.loop) {
@@ -669,7 +673,7 @@ export class Player implements IPlayer {
     provider.on('error', (error) => {
       this._store.batch({ loadingState: 'error', error })
       this._events.emit('error', error)
-      this.announce(`Error: ${error.message}`)
+      this.announce(label(this._el, 'errorMessage', { message: error.message }))
     })
 
     provider.on('statechange', (state) => {
@@ -685,7 +689,7 @@ export class Player implements IPlayer {
     provider.on('fullscreenchange', (fullscreen) => {
       this._store.set('fullscreen', fullscreen)
       this._events.emit('fullscreenchange', fullscreen)
-      this.announce(fullscreen ? 'Entered fullscreen' : 'Exited fullscreen')
+      this.announce(label(this._el, fullscreen ? 'enteredFullscreen' : 'exitedFullscreen'))
     })
 
     provider.on('pipchange', (pip) => {
@@ -703,7 +707,20 @@ export class Player implements IPlayer {
 
   // === Playback ===
 
-  async play(): Promise<void> {
+  /**
+   * Play what was asked for before the source was ready. A browser that
+   * refuses sound without a tap (code 1) gets it muted instead, as autoplay
+   * is everywhere, and the mute button turns it up.
+   */
+  private async startRequestedPlay(provider: Provider): Promise<void> {
+    await provider.play().catch(() => {})
+    if (this._provider !== provider || this.state.error?.code !== 1 || this.state.muted) return
+    this._store.set('error', null)
+    this.setMuted(true)
+    await provider.play().catch(() => {})
+  }
+
+    async play(): Promise<void> {
     if (!this._provider) {
       this._playRequested = true
       return
