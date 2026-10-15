@@ -1,5 +1,19 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.9...v0.1.10)
+
+## 🐛 Bug Fixes
+
+- **player**: fill the player, and fullscreen with its controls ([840fcf0](https://github.com/stacksjs/ts-video-player/commit/840fcf0)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.10 ([7f939f0](https://github.com/stacksjs/ts-video-player/commit/7f939f0)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.8...v0.1.9)
 
 ## 🐛 Bug Fixes
