@@ -263,6 +263,8 @@ export class Player implements IPlayer {
       toggleCaptions: () => this.toggleCaptions(),
       seekBackward: () => this.seekBy(-5),
       seekForward: () => this.seekBy(5),
+      seekBackwardLong: () => this.seekBy(-10),
+      seekForwardLong: () => this.seekBy(10),
       volumeUp: () => this.setVolume(Math.min(1, this.state.volume + 0.1)),
       volumeDown: () => this.setVolume(Math.max(0, this.state.volume - 0.1)),
       speedUp: () => this.setPlaybackRate(Math.min(4, this.state.playbackRate + 0.25)),
@@ -599,7 +601,10 @@ export class Player implements IPlayer {
     })
 
     provider.on('pause', () => {
-      this._store.set('paused', true)
+      // Not playing any more either: the controls hide only while playing,
+      // and a paused player that still said `playing` hid them over a still
+      // frame, and told everyone reading state.playing it was still going.
+      this._store.batch({ paused: true, playing: false, playbackState: 'paused' })
       this._events.emit('pause')
       this.announce(label(this._el, 'paused'))
     })

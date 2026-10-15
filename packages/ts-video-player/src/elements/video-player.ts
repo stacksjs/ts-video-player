@@ -31,7 +31,9 @@ export class VideoPlayerElement extends HTMLElementBase {
     if (this._player) return
 
     // Create shadow DOM
-    const shadow = this.shadowRoot ?? this.attachShadow({ mode: 'open' })
+    // delegatesFocus: focusing <video-player> (a dialog's first focus, an
+    // `autofocus`) puts focus on the player itself, where its keys work.
+    const shadow = this.shadowRoot ?? this.attachShadow({ mode: 'open', delegatesFocus: true })
 
     // Container
     this._container = document.createElement('div')

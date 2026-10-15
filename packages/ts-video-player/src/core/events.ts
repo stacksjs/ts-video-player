@@ -208,7 +208,12 @@ export class MediaEventsNormalizer {
 export function onFullscreenChange(handler: (fullscreen: boolean) => void): () => void {
   const events = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
 
-  const listener = () => {
+  const listener = (event?: Event) => {
+    // The browser's own change only. <video-player> re-dispatches the player's
+    // events on itself, bubbling and composed, under the same names; its
+    // "fullscreenchange" reached this document listener, which announced it
+    // again, and the two fed each other until the stack overflowed.
+    if (event && typeof CustomEvent !== 'undefined' && event instanceof CustomEvent) return
     const fullscreen = !!(
       document.fullscreenElement ||
       (document as any).webkitFullscreenElement ||
@@ -261,8 +266,8 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: Record<string, string> = {
   c: 'toggleCaptions',
   ArrowLeft: 'seekBackward',
   ArrowRight: 'seekForward',
-  j: 'seekBackward',
-  l: 'seekForward',
+  j: 'seekBackwardLong',
+  l: 'seekForwardLong',
   ArrowUp: 'volumeUp',
   ArrowDown: 'volumeDown',
   '>': 'speedUp',
@@ -292,6 +297,9 @@ export interface KeyboardActions {
   toggleCaptions(): void
   seekBackward(): void
   seekForward(): void
+  /** J and L: ten seconds, as YouTube's keys go (the arrows are five). Falls back to seekBackward/seekForward. */
+  seekBackwardLong?(): void
+  seekForwardLong?(): void
   volumeUp(): void
   volumeDown(): void
   speedUp(): void
@@ -350,6 +358,14 @@ export function createKeyboardHandler(
         break
       case 'seekForward':
         actions.seekForward()
+        break
+      case 'seekBackwardLong':
+        if (actions.seekBackwardLong) actions.seekBackwardLong()
+        else actions.seekBackward()
+        break
+      case 'seekForwardLong':
+        if (actions.seekForwardLong) actions.seekForwardLong()
+        else actions.seekForward()
         break
       case 'volumeUp':
         actions.volumeUp()
