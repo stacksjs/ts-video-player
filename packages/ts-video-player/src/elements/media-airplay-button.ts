@@ -27,6 +27,8 @@ export class MediaAirplayButton extends HTMLElementBase {
           button { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 8px; background: transparent; border: 0; color: inherit; cursor: pointer; }
           button:hover { opacity: 0.8; }
           :host([connected]) button { color: var(--media-airplay-active-color, #38bdf8); }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button" aria-label="${label(this, 'airPlayPlay')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon"><path d="${AIRPLAY_ICON}"/></svg>

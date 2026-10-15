@@ -42,6 +42,8 @@ export class MediaVolumeSlider extends HTMLElementBase {
             transition: transform 0.1s;
           }
           .container:hover .thumb { transform: translate(-50%, -50%) scale(1.2); }
+          /* A finger needs more than the 20px a mouse does. */
+          @media (pointer: coarse) { .container { height: 36px; } .thumb { width: 18px; height: 18px; } }
         </style>
         <div class="container" part="container" role="slider"
           aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"

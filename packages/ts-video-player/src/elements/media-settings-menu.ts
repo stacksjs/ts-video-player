@@ -54,6 +54,8 @@ export class MediaSettingsMenu extends HTMLElementBase {
           .item[aria-checked="true"]::before { content: '\\2713'; }
           .item[aria-checked="false"]::before { content: ''; min-width: 12px; display: inline-block; }
           .back { font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button class="trigger" part="trigger" type="button"
                 aria-label="${say(this, 'settings')}" aria-haspopup="true" aria-expanded="false">

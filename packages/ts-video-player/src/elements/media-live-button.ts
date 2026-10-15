@@ -20,6 +20,8 @@ export class MediaLiveButton extends HTMLElementBase {
           button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px; background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
           i { width: 8px; height: 8px; border-radius: 9999px; background: #ef4444; }
           :host(:not([at-live-edge])) button { opacity: 0.72; }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button" aria-label="${label(this, 'seekToLive')}"><i aria-hidden="true"></i><span>${label(this, 'live')}</span></button>
       `

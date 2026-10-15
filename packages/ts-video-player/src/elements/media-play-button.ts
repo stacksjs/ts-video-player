@@ -27,6 +27,8 @@ export class MediaPlayButton extends HTMLElementBase {
             background: transparent; border: none; color: inherit; cursor: pointer;
           }
           button:hover { opacity: 0.8; }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button" aria-label="${label(this, 'play')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon">

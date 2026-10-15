@@ -28,6 +28,8 @@ export class MediaFullscreenButton extends HTMLElementBase {
           }
           button:hover { opacity: 0.8; }
           button:disabled { opacity: 0.4; cursor: not-allowed; }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button" aria-label="${label(this, 'enterFullscreen')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon">

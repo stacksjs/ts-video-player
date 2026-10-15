@@ -18,6 +18,8 @@ export class MediaPlaybackRateButton extends HTMLElementBase {
           button { min-width: 42px; height: 40px; padding: 0 8px; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; font-variant-numeric: tabular-nums; }
           button:hover { opacity: .8; }
           button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button" aria-label="${label(this, 'speed')}"></button>
       `

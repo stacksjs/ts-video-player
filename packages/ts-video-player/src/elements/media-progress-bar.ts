@@ -65,6 +65,8 @@ export class MediaProgressBar extends HTMLElementBase {
             border-top-color: rgba(0,0,0,0.85);
           }
           .container:hover .tooltip { opacity: 1; }
+          /* A finger needs more than the 20px a mouse does. */
+          @media (pointer: coarse) { .container { height: 36px; } .thumb { width: 18px; height: 18px; } }
         </style>
         <div class="container" part="container" role="slider"
           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"

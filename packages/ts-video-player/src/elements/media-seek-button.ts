@@ -17,6 +17,8 @@ export class MediaSeekButton extends HTMLElementBase {
           button:hover { opacity: .8; }
           button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
           button:disabled { cursor: default; opacity: .45; }
+          /* 44px, the smallest a finger hits reliably, on a touch screen. */
+          @media (pointer: coarse) { button { min-width: 44px; min-height: 44px; } }
         </style>
         <button part="button" type="button"></button>
       `
