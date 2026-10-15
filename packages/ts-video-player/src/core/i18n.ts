@@ -74,6 +74,31 @@ export interface TranslationStrings {
   close: string
   menu: string
   back: string
+  // The controls' own names and what a screen reader hears (elements/*)
+  seek: string
+  playbackRate: string
+  airPlayPlay: string
+  remotePlayback: string
+  videoPlayer: string
+  videoRole: string
+  playTitle: string
+  audio: string
+  defaultTrack: string
+  playing: string
+  paused: string
+  muted: string
+  volumeLevel: string
+  ended: string
+  enteredFullscreen: string
+  exitedFullscreen: string
+  errorMessage: string
+  timeOf: string
+  hourOne: string
+  hourOther: string
+  minuteOne: string
+  minuteOther: string
+  secondOne: string
+  secondOther: string
 }
 
 export type TranslationKey = keyof TranslationStrings
@@ -157,6 +182,30 @@ export const englishStrings: TranslationStrings = {
   close: 'Close',
   menu: 'Menu',
   back: 'Back',
+  seek: 'Seek',
+  playbackRate: 'Playback speed {rate}x',
+  airPlayPlay: 'Play on AirPlay',
+  remotePlayback: 'Play on another device',
+  videoPlayer: 'Video player',
+  videoRole: 'video player',
+  playTitle: 'Play {title}',
+  audio: 'Audio',
+  defaultTrack: 'Default',
+  playing: 'Playing',
+  paused: 'Paused',
+  muted: 'Muted',
+  volumeLevel: 'Volume {percent}%',
+  ended: 'Playback ended',
+  enteredFullscreen: 'Entered fullscreen',
+  exitedFullscreen: 'Exited fullscreen',
+  errorMessage: 'Error: {message}',
+  timeOf: '{current} of {duration}',
+  hourOne: '{n} hour',
+  hourOther: '{n} hours',
+  minuteOne: '{n} minute',
+  minuteOther: '{n} minutes',
+  secondOne: '{n} second',
+  secondOther: '{n} seconds',
 }
 
 export const spanishStrings: TranslationStrings = {
@@ -209,6 +258,30 @@ export const spanishStrings: TranslationStrings = {
   close: 'Cerrar',
   menu: 'Menú',
   back: 'Volver',
+  seek: 'Buscar',
+  playbackRate: 'Velocidad de reproducción {rate}x',
+  airPlayPlay: 'Reproducir con AirPlay',
+  remotePlayback: 'Reproducir en otro dispositivo',
+  videoPlayer: 'Reproductor de vídeo',
+  videoRole: 'reproductor de vídeo',
+  playTitle: 'Reproducir {title}',
+  audio: 'Audio',
+  defaultTrack: 'Predeterminado',
+  playing: 'Reproduciendo',
+  paused: 'En pausa',
+  muted: 'Silenciado',
+  volumeLevel: 'Volumen {percent}%',
+  ended: 'Reproducción finalizada',
+  enteredFullscreen: 'Pantalla completa activada',
+  exitedFullscreen: 'Pantalla completa desactivada',
+  errorMessage: 'Error: {message}',
+  timeOf: '{current} de {duration}',
+  hourOne: '{n} hora',
+  hourOther: '{n} horas',
+  minuteOne: '{n} minuto',
+  minuteOther: '{n} minutos',
+  secondOne: '{n} segundo',
+  secondOther: '{n} segundos',
 }
 
 export const frenchStrings: TranslationStrings = {
@@ -261,6 +334,30 @@ export const frenchStrings: TranslationStrings = {
   close: 'Fermer',
   menu: 'Menu',
   back: 'Retour',
+  seek: 'Rechercher',
+  playbackRate: 'Vitesse de lecture {rate}x',
+  airPlayPlay: 'Lire avec AirPlay',
+  remotePlayback: 'Lire sur un autre appareil',
+  videoPlayer: 'Lecteur vidéo',
+  videoRole: 'lecteur vidéo',
+  playTitle: 'Lire {title}',
+  audio: 'Audio',
+  defaultTrack: 'Par défaut',
+  playing: 'Lecture',
+  paused: 'En pause',
+  muted: 'Son coupé',
+  volumeLevel: 'Volume {percent} %',
+  ended: 'Lecture terminée',
+  enteredFullscreen: 'Plein écran activé',
+  exitedFullscreen: 'Plein écran désactivé',
+  errorMessage: 'Erreur : {message}',
+  timeOf: '{current} sur {duration}',
+  hourOne: '{n} heure',
+  hourOther: '{n} heures',
+  minuteOne: '{n} minute',
+  minuteOther: '{n} minutes',
+  secondOne: '{n} seconde',
+  secondOther: '{n} secondes',
 }
 
 export const germanStrings: TranslationStrings = {
@@ -313,6 +410,30 @@ export const germanStrings: TranslationStrings = {
   close: 'Schließen',
   menu: 'Menü',
   back: 'Zurück',
+  seek: 'Spulen',
+  playbackRate: 'Wiedergabegeschwindigkeit {rate}x',
+  airPlayPlay: 'Über AirPlay abspielen',
+  remotePlayback: 'Auf einem anderen Gerät abspielen',
+  videoPlayer: 'Videoplayer',
+  videoRole: 'Videoplayer',
+  playTitle: '{title} abspielen',
+  audio: 'Audio',
+  defaultTrack: 'Standard',
+  playing: 'Wird abgespielt',
+  paused: 'Pausiert',
+  muted: 'Stumm',
+  volumeLevel: 'Lautstärke {percent} %',
+  ended: 'Wiedergabe beendet',
+  enteredFullscreen: 'Vollbild an',
+  exitedFullscreen: 'Vollbild aus',
+  errorMessage: 'Fehler: {message}',
+  timeOf: '{current} von {duration}',
+  hourOne: '{n} Stunde',
+  hourOther: '{n} Stunden',
+  minuteOne: '{n} Minute',
+  minuteOther: '{n} Minuten',
+  secondOne: '{n} Sekunde',
+  secondOther: '{n} Sekunden',
 }
 
 export const japaneseStrings: TranslationStrings = {
@@ -365,6 +486,30 @@ export const japaneseStrings: TranslationStrings = {
   close: '閉じる',
   menu: 'メニュー',
   back: '戻る',
+  seek: 'シーク',
+  playbackRate: '再生速度 {rate}x',
+  airPlayPlay: 'AirPlayで再生',
+  remotePlayback: '別のデバイスで再生',
+  videoPlayer: '動画プレーヤー',
+  videoRole: '動画プレーヤー',
+  playTitle: '{title}を再生',
+  audio: '音声',
+  defaultTrack: 'デフォルト',
+  playing: '再生中',
+  paused: '一時停止中',
+  muted: 'ミュート',
+  volumeLevel: '音量 {percent}%',
+  ended: '再生終了',
+  enteredFullscreen: '全画面表示',
+  exitedFullscreen: '全画面表示を終了',
+  errorMessage: 'エラー: {message}',
+  timeOf: '{current} / {duration}',
+  hourOne: '{n}時間',
+  hourOther: '{n}時間',
+  minuteOne: '{n}分',
+  minuteOther: '{n}分',
+  secondOne: '{n}秒',
+  secondOther: '{n}秒',
 }
 
 export const chineseStrings: TranslationStrings = {
@@ -417,6 +562,30 @@ export const chineseStrings: TranslationStrings = {
   close: '关闭',
   menu: '菜单',
   back: '返回',
+  seek: '跳转',
+  playbackRate: '播放速度 {rate}x',
+  airPlayPlay: '通过 AirPlay 播放',
+  remotePlayback: '在其他设备上播放',
+  videoPlayer: '视频播放器',
+  videoRole: '视频播放器',
+  playTitle: '播放{title}',
+  audio: '音频',
+  defaultTrack: '默认',
+  playing: '正在播放',
+  paused: '已暂停',
+  muted: '已静音',
+  volumeLevel: '音量 {percent}%',
+  ended: '播放结束',
+  enteredFullscreen: '已进入全屏',
+  exitedFullscreen: '已退出全屏',
+  errorMessage: '错误：{message}',
+  timeOf: '{current} / {duration}',
+  hourOne: '{n}小时',
+  hourOther: '{n}小时',
+  minuteOne: '{n}分钟',
+  minuteOther: '{n}分钟',
+  secondOne: '{n}秒',
+  secondOther: '{n}秒',
 }
 
 export const defaultTranslations: Record<string, TranslationStrings> = {
@@ -439,9 +608,12 @@ export class I18n {
   private interpolationPattern: RegExp
 
   constructor(config: I18nConfig = {}) {
+    // The translations first: detectLanguage() looks the browser's language
+    // up in them, and before they were set it threw for every instance made
+    // without a language.
+    this.translations = { ...defaultTranslations }
     this.language = config.language || this.detectLanguage() || 'en'
     this.fallbackLanguage = config.fallbackLanguage || 'en'
-    this.translations = { ...defaultTranslations }
 
     // Merge custom translations
     if (config.translations) {

@@ -1,4 +1,4 @@
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 import type { PlayerState } from '../types'
 
 const defaultRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -19,7 +19,7 @@ export class MediaPlaybackRateButton extends HTMLElementBase {
           button:hover { opacity: .8; }
           button:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
         </style>
-        <button part="button" type="button" aria-label="Playback speed"></button>
+        <button part="button" type="button" aria-label="${label(this, 'speed')}"></button>
       `
     }
     queueMicrotask(() => this.attach())
@@ -53,7 +53,7 @@ export class MediaPlaybackRateButton extends HTMLElementBase {
     button.addEventListener('click', this.onClick)
     this.cleanup = player.subscribe('playbackRate', (state: PlayerState) => {
       button.textContent = `${state.playbackRate}x`
-      button.setAttribute('aria-label', `Playback speed ${state.playbackRate}x`)
+      button.setAttribute('aria-label', label(this, 'playbackRate', { rate: state.playbackRate }))
     })
   }
 }

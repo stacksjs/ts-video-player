@@ -8,7 +8,7 @@
  */
 
 import { HTMLElementBase } from './base'
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 
 const REMOTE_ICON = 'M1 18v3h3a3 3 0 0 0-3-3zm0-4v2a5 5 0 0 1 5 5h2a7 7 0 0 0-7-7zm0-4v2c5 0 9 4 9 9h2c0-6.1-4.9-11-11-11zm18-7H5a2 2 0 0 0-2 2v3h2V5h14v10h-5v2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z'
 
@@ -33,7 +33,7 @@ export class MediaRemotePlaybackButton extends HTMLElementBase {
           button:hover { opacity: 0.8; }
           :host([connected]) button { color: var(--media-remote-active-color, #38bdf8); }
         </style>
-        <button part="button" type="button" aria-label="Play on another device">
+        <button part="button" type="button" aria-label="${label(this, 'remotePlayback')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon"><path d="${REMOTE_ICON}"/></svg>
         </button>
       `

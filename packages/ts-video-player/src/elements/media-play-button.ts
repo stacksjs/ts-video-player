@@ -4,7 +4,7 @@
  * @module elements/media-play-button
  */
 
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 
 const PLAY_ICON = 'M8 5v14l11-7z'
 const PAUSE_ICON = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'
@@ -28,7 +28,7 @@ export class MediaPlayButton extends HTMLElementBase {
           }
           button:hover { opacity: 0.8; }
         </style>
-        <button part="button" type="button" aria-label="Play">
+        <button part="button" type="button" aria-label="${label(this, 'play')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon">
             <path d="${PLAY_ICON}"/>
           </svg>
@@ -58,7 +58,7 @@ export class MediaPlayButton extends HTMLElementBase {
 
     const unsub = player.subscribe('paused', (state: any) => {
       const paused = state.paused
-      btn.setAttribute('aria-label', paused ? 'Play' : 'Pause')
+      btn.setAttribute('aria-label', label(this, paused ? 'play' : 'pause'))
       btn.setAttribute('aria-pressed', String(!paused))
       const path = this.shadowRoot!.querySelector('path')!
       path.setAttribute('d', paused ? PLAY_ICON : PAUSE_ICON)

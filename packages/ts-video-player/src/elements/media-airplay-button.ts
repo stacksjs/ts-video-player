@@ -5,7 +5,7 @@
  */
 
 import { HTMLElementBase } from './base'
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 
 const AIRPLAY_ICON = 'M6.2 19h11.6L12 13.2 6.2 19zM19 3H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2v-2H5V5h14v10h-2v2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z'
 
@@ -28,7 +28,7 @@ export class MediaAirplayButton extends HTMLElementBase {
           button:hover { opacity: 0.8; }
           :host([connected]) button { color: var(--media-airplay-active-color, #38bdf8); }
         </style>
-        <button part="button" type="button" aria-label="Play on AirPlay">
+        <button part="button" type="button" aria-label="${label(this, 'airPlayPlay')}">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon"><path d="${AIRPLAY_ICON}"/></svg>
         </button>
       `

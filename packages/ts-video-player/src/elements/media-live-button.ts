@@ -5,7 +5,7 @@
  */
 
 import { HTMLElementBase } from './base'
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 
 export class MediaLiveButton extends HTMLElementBase {
   private cleanup: (() => void) | null = null
@@ -21,7 +21,7 @@ export class MediaLiveButton extends HTMLElementBase {
           i { width: 8px; height: 8px; border-radius: 9999px; background: #ef4444; }
           :host(:not([at-live-edge])) button { opacity: 0.72; }
         </style>
-        <button part="button" type="button" aria-label="Go to live edge"><i aria-hidden="true"></i><span>LIVE</span></button>
+        <button part="button" type="button" aria-label="${label(this, 'seekToLive')}"><i aria-hidden="true"></i><span>${label(this, 'live')}</span></button>
       `
     }
     queueMicrotask(() => this.attach())

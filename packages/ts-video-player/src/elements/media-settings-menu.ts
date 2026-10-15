@@ -7,7 +7,7 @@
  * @module elements/media-settings-menu
  */
 
-import { resolvePlayer } from './utils'
+import { label as say, resolvePlayer } from './utils'
 import { computePosition } from '../core/popover'
 
 const GEAR_ICON = 'M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z'
@@ -56,7 +56,7 @@ export class MediaSettingsMenu extends HTMLElementBase {
           .back { font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); }
         </style>
         <button class="trigger" part="trigger" type="button"
-                aria-label="Settings" aria-haspopup="true" aria-expanded="false">
+                aria-label="${say(this, 'settings')}" aria-haspopup="true" aria-expanded="false">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" part="icon">
             <path d="${GEAR_ICON}"/>
           </svg>
@@ -177,7 +177,7 @@ export class MediaSettingsMenu extends HTMLElementBase {
     const state = player.state
 
     // Speed
-    this.addItem(menu, `Speed: ${state.playbackRate}x`, () => {
+    this.addItem(menu, `${say(this, 'speed')}: ${state.playbackRate}x`, () => {
       this._currentPanel = 'speed'
       this.renderPanel()
     })
@@ -185,8 +185,8 @@ export class MediaSettingsMenu extends HTMLElementBase {
     // Quality
     if (state.qualities.length > 0) {
       const current = state.qualities.find((q: any) => q.selected)
-      const label = state.autoQuality ? 'Auto' : (current ? `${current.height}p` : 'Auto')
-      this.addItem(menu, `Quality: ${label}`, () => {
+      const label = state.autoQuality ? say(this, 'auto') : (current ? `${current.height}p` : say(this, 'auto'))
+      this.addItem(menu, `${say(this, 'quality')}: ${label}`, () => {
         this._currentPanel = 'quality'
         this.renderPanel()
       })
@@ -195,7 +195,7 @@ export class MediaSettingsMenu extends HTMLElementBase {
     // Captions
     if (state.textTracks.length > 0) {
       const showing = state.textTracks.find((t: any) => t.mode === 'showing')
-      this.addItem(menu, `Captions: ${showing?.label || 'Off'}`, () => {
+      this.addItem(menu, `${say(this, 'captions')}: ${showing?.label || say(this, 'captionsOff')}`, () => {
         this._currentPanel = 'captions'
         this.renderPanel()
       })
@@ -203,7 +203,7 @@ export class MediaSettingsMenu extends HTMLElementBase {
 
     if (state.audioTracks.length > 1) {
       const selected = state.audioTracks.find((track: { selected: boolean }) => track.selected)
-      this.addItem(menu, `Audio: ${selected?.label || 'Default'}`, () => {
+      this.addItem(menu, `${say(this, 'audio')}: ${selected?.label || say(this, 'defaultTrack')}`, () => {
         this._currentPanel = 'audio'
         this.renderPanel()
       })
@@ -211,7 +211,7 @@ export class MediaSettingsMenu extends HTMLElementBase {
   }
 
   private renderSpeed(menu: Element, player: any): void {
-    this.addItem(menu, 'Back', () => {
+    this.addItem(menu, say(this, 'back'), () => {
       this._currentPanel = 'main'
       this.renderPanel()
     }, false, true)
@@ -226,13 +226,13 @@ export class MediaSettingsMenu extends HTMLElementBase {
   }
 
   private renderQuality(menu: Element, player: any): void {
-    this.addItem(menu, 'Back', () => {
+    this.addItem(menu, say(this, 'back'), () => {
       this._currentPanel = 'main'
       this.renderPanel()
     }, false, true)
 
     // Auto option
-    this.addItem(menu, 'Auto', () => {
+    this.addItem(menu, say(this, 'auto'), () => {
       player.setQuality('auto')
       this.close()
     }, player.state.autoQuality)
@@ -246,14 +246,14 @@ export class MediaSettingsMenu extends HTMLElementBase {
   }
 
   private renderCaptions(menu: Element, player: any): void {
-    this.addItem(menu, 'Back', () => {
+    this.addItem(menu, say(this, 'back'), () => {
       this._currentPanel = 'main'
       this.renderPanel()
     }, false, true)
 
     // Off option
     const anyShowing = player.state.textTracks.some((t: any) => t.mode === 'showing')
-    this.addItem(menu, 'Off', () => {
+    this.addItem(menu, say(this, 'captionsOff'), () => {
       for (const t of player.state.textTracks) {
         if (t.mode === 'showing') player.setTextTrack(t.id, 'disabled')
       }
@@ -271,13 +271,13 @@ export class MediaSettingsMenu extends HTMLElementBase {
   }
 
   private renderAudio(menu: Element, player: any): void {
-    this.addItem(menu, 'Back', () => {
+    this.addItem(menu, say(this, 'back'), () => {
       this._currentPanel = 'main'
       this.renderPanel()
     }, false, true)
 
     for (const track of player.state.audioTracks) {
-      this.addItem(menu, track.label || track.language || 'Audio track', () => {
+      this.addItem(menu, track.label || track.language || say(this, 'audioTrack'), () => {
         player.setAudioTrack(track.id)
         this.close()
       }, track.selected)

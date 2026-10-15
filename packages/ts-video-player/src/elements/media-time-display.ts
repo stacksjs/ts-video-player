@@ -39,7 +39,7 @@ export class MediaTimeDisplay extends HTMLElementBase {
           time { color: inherit; }
           .separator { margin: 0 2px; }
         </style>
-        <time part="time" datetime="PT0S" aria-valuetext="0 seconds">0:00</time>
+        <time part="time" datetime="PT0S" aria-valuetext="${formatTimePhrase(0, this)}">0:00</time>
       `
     }
 
@@ -94,6 +94,6 @@ export class MediaTimeDisplay extends HTMLElementBase {
     }
 
     timeEl.setAttribute('datetime', toISODuration(seconds))
-    timeEl.setAttribute('aria-valuetext', formatTimePhrase(seconds))
+    timeEl.setAttribute('aria-valuetext', formatTimePhrase(seconds, this))
   }
 }

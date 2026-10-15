@@ -6,7 +6,7 @@
  * @module elements/media-progress-bar
  */
 
-import { resolvePlayer, formatTime, formatTimePhrase } from './utils'
+import { label, resolvePlayer, formatTime, formatTimePhrase } from './utils'
 
 import { HTMLElementBase } from './base'
 
@@ -68,7 +68,7 @@ export class MediaProgressBar extends HTMLElementBase {
         </style>
         <div class="container" part="container" role="slider"
           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-          aria-label="Seek" tabindex="0">
+          aria-label="${label(this, 'seek')}" tabindex="0">
           <div class="tooltip" part="tooltip">0:00</div>
           <div class="track" part="track">
             <div class="waveform" part="waveform" aria-hidden="true"></div>
@@ -188,7 +188,7 @@ export class MediaProgressBar extends HTMLElementBase {
       thumb.style.left = `${percent}%`
 
       container.setAttribute('aria-valuenow', String(Math.round(percent)))
-      container.setAttribute('aria-valuetext', `${formatTimePhrase(state.currentTime)} of ${formatTimePhrase(duration)}`)
+      container.setAttribute('aria-valuetext', label(this, 'timeOf', { current: formatTimePhrase(state.currentTime, this), duration: formatTimePhrase(duration, this) }))
 
       // Buffered
       const bufferedPct = (state.bufferedAmount || 0) * 100

@@ -1,4 +1,4 @@
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 import type { PlayerState } from '../types'
 
 import { HTMLElementBase } from './base'
@@ -38,9 +38,8 @@ export class MediaSeekButton extends HTMLElementBase {
     if (!player || !button) return
     const seconds = Number.parseFloat(this.getAttribute('seconds') ?? '10')
     const offset = Number.isFinite(seconds) && seconds !== 0 ? seconds : 10
-    const label = offset > 0 ? `Forward ${offset} seconds` : `Back ${Math.abs(offset)} seconds`
     button.textContent = offset > 0 ? `+${offset}` : String(offset)
-    button.setAttribute('aria-label', label)
+    button.setAttribute('aria-label', label(this, offset > 0 ? 'seekForward' : 'seekBackward', { seconds: Math.abs(offset) }))
     this.onClick = () => player.seekBy(offset)
     button.addEventListener('click', this.onClick)
     this.cleanup = player.subscribe((state: PlayerState) => {

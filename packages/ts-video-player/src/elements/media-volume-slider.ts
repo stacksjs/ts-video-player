@@ -6,7 +6,7 @@
  * @module elements/media-volume-slider
  */
 
-import { resolvePlayer } from './utils'
+import { label, resolvePlayer } from './utils'
 
 import { HTMLElementBase } from './base'
 
@@ -45,7 +45,7 @@ export class MediaVolumeSlider extends HTMLElementBase {
         </style>
         <div class="container" part="container" role="slider"
           aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"
-          aria-label="Volume" tabindex="0">
+          aria-label="${label(this, 'volume')}" tabindex="0">
           <div class="track" part="track">
             <div class="fill" part="fill"></div>
             <div class="thumb" part="thumb"></div>
