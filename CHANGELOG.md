@@ -1,5 +1,20 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.8...v0.1.9)
+
+## 🐛 Bug Fixes
+
+- **elements**: touch-sized controls on a touch screen ([fc886b9](https://github.com/stacksjs/ts-video-player/commit/fc886b9)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **player**: pause stops "playing", J and L skip ten seconds ([3378e3d](https://github.com/stacksjs/ts-video-player/commit/3378e3d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.9 ([36ef328](https://github.com/stacksjs/ts-video-player/commit/36ef328)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.7...v0.1.8)
 
 ## 🐛 Bug Fixes
