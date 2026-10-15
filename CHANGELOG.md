@@ -1,5 +1,20 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.7...v0.1.8)
+
+## 🐛 Bug Fixes
+
+- **player**: each chosen video autoplays, and Vimeo loads in place ([da6c5de](https://github.com/stacksjs/ts-video-player/commit/da6c5de)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **elements**: controls speak the page's language ([fbca7ff](https://github.com/stacksjs/ts-video-player/commit/fbca7ff)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.8 ([44abf54](https://github.com/stacksjs/ts-video-player/commit/44abf54)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.6...v0.1.7)
 
 ## 🐛 Bug Fixes
