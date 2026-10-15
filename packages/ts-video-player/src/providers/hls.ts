@@ -207,6 +207,11 @@ export class HLSProvider extends BaseProvider {
     // Create video element
     this.video = document.createElement('video')
     this.video.className = 'ts-video-player__media'
+    // Sized here: inside <video-player>'s shadow root no page stylesheet
+    // reaches it, and unsized a <video> shows at its own resolution, clipped
+    // by the player (a 1280px clip in a 1024px dialog lost its edges, and
+    // in fullscreen it sat in a corner). Letterboxed, never cropped.
+    this.video.style.cssText = 'display:block;width:100%;height:100%;object-fit:contain;background:#000'
 
     // Set attributes
     if (this.options.autoplay) this.video.autoplay = true

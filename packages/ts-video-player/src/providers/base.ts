@@ -18,7 +18,7 @@ import type {
   MediaError,
   FeatureAvailability,
 } from '../types'
-import { EventEmitter } from '../core/events'
+import { EventEmitter, onFullscreenChange } from '../core/events'
 import {
   detectVolumeAvailability,
   detectFullscreenAvailability,
@@ -63,6 +63,8 @@ export abstract class BaseProvider implements Provider {
 
   destroy(): void {
     this._ready = false
+    this.stopEmbedFullscreen?.()
+    this.stopEmbedFullscreen = null
     this.cleanup()
     this.events.removeAllListeners()
   }
@@ -131,6 +133,37 @@ export abstract class BaseProvider implements Provider {
   }
 
   // === Feature Availability ===
+
+  private stopEmbedFullscreen: (() => void) | null = null
+
+  /**
+   * What an embedded player (YouTube, Vimeo) can do, said once it is ready.
+   *
+   * The native-media providers say it on loadedmetadata; the embeds said
+   * nothing, so fullscreen stayed "unavailable" and its button disabled,
+   * though the player can fill the screen like any other. Fullscreen is the
+   * container's own (the player's controls come along); picture in picture
+   * is the embed's business. Also follows the document into and out of
+   * fullscreen, which only the native providers did.
+   */
+  protected announceEmbedFeatures(): void {
+    // Nothing to measure without a page (server rendering, tests).
+    if (typeof document === 'undefined' || typeof HTMLMediaElement === 'undefined') return
+    const fullscreenAvailability = this.getFeatureAvailability('fullscreen')
+    const pipAvailability = this.getFeatureAvailability('pip')
+    const volumeAvailability = this.getFeatureAvailability('volume')
+    this.events.emit('statechange', {
+      canFullscreen: fullscreenAvailability === 'available',
+      canPictureInPicture: pipAvailability === 'available',
+      fullscreenAvailability,
+      pipAvailability,
+      volumeAvailability,
+    })
+    this.events.emit('availabilitychange', 'fullscreen', fullscreenAvailability)
+    this.events.emit('availabilitychange', 'pip', pipAvailability)
+    this.events.emit('availabilitychange', 'volume', volumeAvailability)
+    this.stopEmbedFullscreen ??= onFullscreenChange(fullscreen => this.events.emit('fullscreenchange', fullscreen))
+  }
 
   getFeatureAvailability(feature: 'volume' | 'fullscreen' | 'pip'): FeatureAvailability {
     // Only pass media element if it's actually an HTMLMediaElement (not an iframe)

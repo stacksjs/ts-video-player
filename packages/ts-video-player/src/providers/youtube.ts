@@ -328,6 +328,7 @@ export class YouTubeProvider extends BaseProvider {
     // Emit initial state
     this.events.emit('loadedmetadata')
     this.events.emit('canplay')
+    this.announceEmbedFeatures()
 
     // Load pending video if any
     if (this.pendingVideoId) {

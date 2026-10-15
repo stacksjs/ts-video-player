@@ -114,6 +114,11 @@ export class HTML5Provider extends BaseProvider {
     // Create media element
     this.media = document.createElement(this.isAudio ? 'audio' : 'video')
     this.media.className = 'ts-video-player__media'
+    // Sized here: inside <video-player>'s shadow root no page stylesheet
+    // reaches it, and unsized a <video> shows at its own resolution, clipped
+    // by the player (a 1280px clip in a 1024px dialog lost its edges, and
+    // in fullscreen it sat in a corner). Letterboxed, never cropped.
+    if (!this.isAudio) this.media.style.cssText = 'display:block;width:100%;height:100%;object-fit:contain;background:#000'
 
     // Set attributes
     if (this.options.autoplay) this.media.autoplay = true

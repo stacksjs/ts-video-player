@@ -22,6 +22,7 @@ import { createMediaSession, type MediaSessionOptions } from './core/media-sessi
 import { lockOrientation, unlockOrientation } from './core/orientation'
 import { defaultLoaders, findSourceCandidates } from './providers'
 import { embedCover } from './core/cover'
+import { enterFullscreen as enterFullscreenElement } from './core/features'
 import { label } from './elements/utils'
 
 // =============================================================================
@@ -799,7 +800,12 @@ export class Player implements IPlayer {
     if (this.state.pictureInPicture) {
       await this.exitPiP()
     }
-    await this._provider?.enterFullscreen()
+    // The whole player, controls included: the provider's own container holds
+    // only the media, so a fullscreen video had no controls to pause or seek
+    // with. A browser that can only take the <video> itself fullscreen (iOS
+    // Safari) still gets it, with the system's controls.
+    const media = this._provider?.mediaElement
+    await enterFullscreenElement(this._el, media instanceof HTMLMediaElement ? media : null)
     if (this._options.fullscreenOrientationLock !== false) {
       lockOrientation('landscape')
     }

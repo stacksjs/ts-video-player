@@ -310,9 +310,8 @@ export class VimeoProvider extends BaseProvider {
       videoWidth: width,
       videoHeight: height,
       aspectRatio: width / height || 16 / 9,
-      canFullscreen: true,
-      canPictureInPicture: false,
     })
+    this.announceEmbedFeatures()
   }
 
   private attachVimeoEvents(): void {
