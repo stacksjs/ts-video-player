@@ -359,6 +359,12 @@ boolean-attribute presence for `controls`, `autoplay` and `loop`. A
 
 ### Events
 
+Release maintainers can retry an existing version without moving its tag using
+`gh workflow run release.yml --ref main -f tag=vX.Y.Z`. The release job checks
+out that tag, grants OIDC token permission for npm trusted publishing, and keeps
+the token fallback. npm must authorize this repository/workflow as a trusted
+publisher, or provide a valid package-scoped `NPM_TOKEN` secret.
+
 ```typescript
 player.on('init', () => {})
 player.on('ready', () => {})
