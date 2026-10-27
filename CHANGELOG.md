@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.11
+
+- Add public `setControls`, `setAutoplay` and `setLoop` APIs without replacing players or providers.
+- Apply live custom-element flags to playback policy; hide and disable built-in controls consistently across keep-alive reconnects.
+- Cancel queued automatic starts independently of explicit play requests, and retain live policy across source changes.
+- Verify real browser playback, looping, delayed loads, pause/destroy cleanup and retained identity (174 tests passing).
+
 [Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.9...v0.1.10)
 
 ## 🐛 Bug Fixes
