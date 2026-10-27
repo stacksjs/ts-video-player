@@ -307,6 +307,9 @@ Use the `@video` directive in your stx templates:
 
 ```typescript
 // Playback
+player.setControls(enabled: boolean): void
+player.setAutoplay(enabled: boolean): void
+player.setLoop(enabled: boolean): void
 player.play(): Promise<void>
 player.pause(): void
 player.togglePlay(): Promise<void>
@@ -343,6 +346,16 @@ player.el: HTMLElement     // Container element
 // Cleanup
 player.destroy(): void
 ```
+
+Policy setters retain the player and provider instances. `setControls(false)`
+hides built-in controls (including keyboard focus targets), independently of
+activity-based hiding. `setAutoplay(false)` cancels queued automatic starts,
+without pausing current playback or discarding an explicit play request;
+enabling it starts a ready source or waits for the current load. Browser
+autoplay restrictions still apply. Loop and autoplay policy apply to later
+sources too. Constructor options remain supported; the custom element follows
+boolean-attribute presence for `controls`, `autoplay` and `loop`. A
+`keep-alive` reconnect retains the player and reconciles control visibility.
 
 ### Events
 

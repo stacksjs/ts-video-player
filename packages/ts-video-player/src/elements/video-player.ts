@@ -81,6 +81,15 @@ export class VideoPlayerElement extends HTMLElementBase {
       case 'muted':
         this._player.setMuted(value !== null)
         break
+      case 'controls':
+        this._player.setControls(value !== null)
+        break
+      case 'autoplay':
+        this._player.setAutoplay(value !== null)
+        break
+      case 'loop':
+        this._player.setLoop(value !== null)
+        break
       case 'volume':
         if (value !== null) this._player.setVolume(parseFloat(value))
         break
@@ -119,7 +128,7 @@ export class VideoPlayerElement extends HTMLElementBase {
     const preload = this.getAttribute('preload')
     if (preload) options.preload = preload as PlayerOptions['preload']
 
-    if (this.hasAttribute('controls')) options.controls = true
+    options.controls = this.hasAttribute('controls')
     options.playsinline = this.getAttribute('playsinline') !== 'false'
 
     const crossorigin = this.getAttribute('crossorigin')

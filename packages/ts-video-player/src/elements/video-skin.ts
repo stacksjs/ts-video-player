@@ -39,6 +39,10 @@ export class VideoSkin extends HTMLElementBase {
             container-type: inline-size;
           }
 
+          :host([controls-disabled]) {
+            display: none;
+          }
+
           /* Click-to-play overlay */
           .overlay {
             flex: 1;
@@ -119,7 +123,11 @@ export class VideoSkin extends HTMLElementBase {
     if (!player) return
 
     // Sync controls visibility
-    const unsub = player.subscribe((state: any) => {
+    const render = (state: any) => {
+      // Activity may reveal controlsVisible even while the author disabled UI.
+      // Keep that independent from the persistent controls policy.
+      this.toggleAttribute('controls-disabled', state.controls === false)
+      this.toggleAttribute('inert', state.controls === false)
       if (state.controlsVisible) {
         this.removeAttribute('controls-hidden')
       } else {
@@ -132,7 +140,11 @@ export class VideoSkin extends HTMLElementBase {
       this.dataset.volume = state.volumeAvailability
       this.dataset.captions = String(state.textTracks.length > 0)
       this.dataset.qualities = String(state.qualities.length > 0)
-    })
+    }
+    // A keep-alive player can change while this skin is disconnected. Its
+    // subscription does not replay state, so reconcile before subscribing.
+    render(player.state)
+    const unsub = player.subscribe(render)
 
     // Click overlay to toggle play
     const overlay = this.shadowRoot!.querySelector('.overlay')!
