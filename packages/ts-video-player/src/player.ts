@@ -52,6 +52,8 @@ export class Player implements IPlayer {
    * loaded, so one tap plays the video rather than one tap per loading step.
    */
   private _playRequested = false
+  private _autoplayRequested = false
+  private _autoplayRequestId = 0
 
   /**
    * Create a new player instance
@@ -212,7 +214,9 @@ export class Player implements IPlayer {
   private updateCover(state: PlayerState): void {
     const cover = this._cover
     if (!cover) return
-    const { show, image } = embedCover(state, this._coverDismissed)
+    const coverState = embedCover(state, this._coverDismissed)
+    const show = coverState.show && state.controls
+    const image = coverState.image
     if (show) {
       const background = image ? `url("${image.replace(/["\\]/g, '')}")` : 'none'
       if (cover.style.backgroundImage !== background) cover.style.backgroundImage = background
@@ -236,6 +240,8 @@ export class Player implements IPlayer {
       muted: this._options.muted ?? false,
       loop: this._options.loop ?? false,
       autoplay: this._options.autoplay ?? false,
+      controls: this._options.controls ?? true,
+      controlsVisible: this._options.controls ?? true,
       playsinline: this._options.playsinline ?? true,
       playbackRate: this._options.playbackRate ?? 1,
       poster: this._options.poster || '',
@@ -291,9 +297,9 @@ export class Player implements IPlayer {
     const cleanup = createActivityDetector(this._el, {
       timeout: this._options.controlsTimeout || 3000,
       onActive: () => {
-        this._store.batch({ userActive: true, controlsVisible: true })
+        this._store.batch({ userActive: true, controlsVisible: this.state.controls })
         this._events.emit('useractivitychange', true)
-        this._events.emit('controlschange', true)
+        this._events.emit('controlschange', this.state.controls)
       },
       onInactive: () => {
         // Only hide controls if playing
@@ -430,6 +436,9 @@ export class Player implements IPlayer {
     if (this._destroyed) return
     this._destroyed = true
     this._sourceLoadId++
+    this._autoplayRequestId++
+    this._autoplayRequested = false
+    this._playRequested = false
 
     // Emit destroy event
     this._events.emit('destroy')
@@ -471,13 +480,17 @@ export class Player implements IPlayer {
     // video (`src` set again on <video-player>) plays each one it is given,
     // not only the first.
     this._coverDismissed = false
-    this._playRequested = !!this._options.autoplay
+    this._playRequested = false
+    this._autoplayRequested = this.state.autoplay
+    this._autoplayRequestId++
     this._store.batch({
       sources,
       src: sources[0],
       loadingState: 'loading',
       error: null,
       started: false,
+      canPlay: false,
+      canPlayThrough: false,
     })
 
     this._events.emit('sourceschange', sources)
@@ -507,6 +520,11 @@ export class Player implements IPlayer {
         try {
           this._provider = await loader.load(mediaContainer, {
             ...this._options,
+            // Player owns these policies so changing a flag also works on an
+            // existing provider. Native loop/autoplay would retain stale options
+            // and can suppress ended or start playback outside this state machine.
+            autoplay: false,
+            loop: false,
             mediaType: loader.mediaType(candidate.src),
           })
           if (this._destroyed || loadId !== this._sourceLoadId) {
@@ -538,9 +556,11 @@ export class Player implements IPlayer {
           mediaType: loader.mediaType(candidate.src),
           providerType: loader.type,
         })
-        if (this._playRequested) {
+        if (this._playRequested || this._autoplayRequested) {
+          const automatic = !this._playRequested
           this._playRequested = false
-          void this.startRequestedPlay(this._provider)
+          this._autoplayRequested = false
+          void this.startRequestedPlay(this._provider, automatic)
         }
         return
       }
@@ -672,7 +692,7 @@ export class Player implements IPlayer {
       // Handle loop
       if (this.state.loop) {
         this.seekTo(0)
-        this.play()
+        void this.play().catch(() => {})
       }
     })
 
@@ -713,14 +733,41 @@ export class Player implements IPlayer {
 
   // === Playback ===
 
+  setControls(controls: boolean): void {
+    if (this._destroyed || controls === this.state.controls) return
+    this._options.controls = controls
+    this._store.batch({ controls, controlsVisible: controls })
+    this._events.emit('controlschange', controls)
+  }
+
+  setLoop(loop: boolean): void {
+    if (this._destroyed) return
+    this._options.loop = loop
+    this._store.set('loop', loop)
+  }
+
+  setAutoplay(autoplay: boolean): void {
+    if (this._destroyed || autoplay === this.state.autoplay) return
+    this._options.autoplay = autoplay
+    this._autoplayRequestId++
+    this._autoplayRequested = autoplay
+    this._store.set('autoplay', autoplay)
+    if (autoplay && this._provider && this.state.canPlay) {
+      this._autoplayRequested = false
+      void this.startRequestedPlay(this._provider, true)
+    }
+  }
+
   /**
    * Play what was asked for before the source was ready. A browser that
    * refuses sound without a tap (code 1) gets it muted instead, as autoplay
    * is everywhere, and the mute button turns it up.
    */
-  private async startRequestedPlay(provider: Provider): Promise<void> {
+  private async startRequestedPlay(provider: Provider, automatic = false, requestId = this._autoplayRequestId): Promise<void> {
+    if (this._destroyed || provider !== this._provider || (automatic && (!this.state.autoplay || requestId !== this._autoplayRequestId))) return
     await provider.play().catch(() => {})
-    if (this._provider !== provider || this.state.error?.code !== 1 || this.state.muted) return
+    if (this._destroyed || this._provider !== provider || this.state.error?.code !== 1 || this.state.muted
+      || (automatic && (!this.state.autoplay || requestId !== this._autoplayRequestId))) return
     this._store.set('error', null)
     this.setMuted(true)
     await provider.play().catch(() => {})
@@ -736,7 +783,12 @@ export class Player implements IPlayer {
 
   pause(): void {
     this._playRequested = false
+    this._autoplayRequested = false
+    this._autoplayRequestId++
     this._provider?.pause()
+    // A following source load may cancel the native pause event. State must
+    // still reflect the explicit pause request without emitting a second event.
+    this._store.batch({ paused: true, playing: false, playbackState: 'paused' })
   }
 
   togglePlay(): void {

@@ -130,6 +130,7 @@ export function createDefaultState(): PlayerState {
     playbackRate: 1,
     loop: false,
     autoplay: false,
+    controls: true,
     playsinline: true,
 
     // Volume

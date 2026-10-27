@@ -311,6 +311,8 @@ export interface PlayerState {
   pipAvailability: FeatureAvailability
 
   // === UI ===
+  /** Whether built-in controls are enabled (independent of activity hiding). */
+  controls: boolean
   /** Whether controls are visible */
   controlsVisible: boolean
   /** Whether user is interacting */
@@ -760,6 +762,12 @@ export interface Player {
   setPoster(url: string): void
 
   // Playback
+  /** Enable or disable built-in controls without replacing the player. */
+  setControls(controls: boolean): void
+  /** Update automatic playback; disabling does not pause explicit playback. */
+  setAutoplay(autoplay: boolean): void
+  /** Update loop policy for the current and subsequent sources. */
+  setLoop(loop: boolean): void
   play(): Promise<void>
   pause(): void
   togglePlay(): void
