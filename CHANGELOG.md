@@ -1,5 +1,26 @@
 # Changelog
 
+[Compare changes](https://github.com/stacksjs/ts-video-player/compare/v0.1.11...v0.1.12)
+
+## 🐛 Bug Fixes
+
+- **youtube**: support privacy-enhanced exercise preview links ([ac4d93c](https://github.com/stacksjs/ts-video-player/commit/ac4d93c)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+- **release**: grant OIDC and support immutable-tag publish retries ([99de3f5](https://github.com/stacksjs/ts-video-player/commit/99de3f5)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🤖 Continuous Integration
+
+- name the Pantry publish token PANTRY_TOKEN ([eeafa67](https://github.com/stacksjs/ts-video-player/commit/eeafa67)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.12 ([2192be0](https://github.com/stacksjs/ts-video-player/commit/2192be0)) _(by Chris Breuer <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _Chris Breuer <chrisbreuer93@gmail.com>_
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 ## v0.1.11
 
 - Add public `setControls`, `setAutoplay` and `setLoop` APIs without replacing players or providers.
