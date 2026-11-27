@@ -13,24 +13,30 @@ import { BaseProvider } from './base'
 // YouTube URL Parsing
 // =============================================================================
 
-/**
- * YouTube URL patterns
- */
-const YOUTUBE_PATTERNS = [
-  /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-  /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-  /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-]
+const YOUTUBE_ID = /^[a-zA-Z0-9_-]{11}$/
 
 /**
  * Extract YouTube video ID from URL
  */
 export function extractYouTubeId(url: string): string | null {
-  for (const pattern of YOUTUBE_PATTERNS) {
-    const match = url.match(pattern)
-    if (match) return match[1]
+  let parsed: URL
+  try {
+    const source = url.trim()
+    parsed = new URL(source.startsWith('//') ? `https:${source}` : source)
   }
-  return null
+  catch {
+    return null
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
+
+  const host = parsed.hostname.replace(/^(?:www\.|m\.|music\.)/, '')
+  const [kind, pathId] = parsed.pathname.split('/').filter(Boolean)
+  if (host === 'youtu.be') return kind && YOUTUBE_ID.test(kind) ? kind : null
+  if (host !== 'youtube.com' && host !== 'youtube-nocookie.com') return null
+
+  if (kind !== 'watch' && !['embed', 'shorts', 'live', 'v'].includes(kind ?? '')) return null
+  const id = kind === 'watch' ? parsed.searchParams.get('v') : pathId
+  return id && YOUTUBE_ID.test(id) ? id : null
 }
 
 /**

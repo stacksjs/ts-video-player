@@ -142,8 +142,22 @@ describe('extractYouTubeId', () => {
     expect(extractYouTubeId('https://www.youtube.com/embed/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ')
   })
 
+  test('detects privacy-enhanced embeds, Shorts, live URLs and watch links with extra parameters', () => {
+    for (const src of [
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?playsinline=1',
+      'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+      'https://m.youtube.com/live/dQw4w9WgXcQ',
+      'https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ',
+    ]) {
+      expect(extractYouTubeId(src)).toBe('dQw4w9WgXcQ')
+      expect(isYouTubeSource(src)).toBe(true)
+    }
+  })
+
   test('returns null for non-YouTube', () => {
     expect(extractYouTubeId('https://vimeo.com/123')).toBeNull()
+    expect(extractYouTubeId('https://fake.example/youtube.com/embed/dQw4w9WgXcQ')).toBeNull()
+    expect(extractYouTubeId('https://www.youtube.com/embed/dQw4w9WgXcQextra')).toBeNull()
   })
 })
 
